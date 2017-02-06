@@ -1,5 +1,6 @@
 %% Simple SPBC Model // Read Me First
-% by %  Jaromir Benes%
+% by Jaromir Benes
+%
 % This tutorial is a collection of example files for a simple sticky-price
 % business cycle model (SPBC). The model file and m-files included in the
 % tutorial describe a typical workflow in building and operating a
