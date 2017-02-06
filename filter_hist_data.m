@@ -168,7 +168,7 @@ legend(edescript{:}, 'Location', 'NorthWest');
 % Otherwise, the information content of this figure window is the same as
 % the previous one.
 
-g = grouping(mest, 'Shock');
+g = grouping(mest, 'Shock', 'IncludeExtras=', true); 
 g = addgroup(g, 'Measurement', 'M.*');
 g = addgroup(g, 'Demand', 'Ey, Er');
 g = addgroup(g, 'Supply', 'Ep, Ea, Ew');
