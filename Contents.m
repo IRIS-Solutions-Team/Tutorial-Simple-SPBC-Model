@@ -4,6 +4,8 @@
 % and runs a number of basic and more advanced experiments to illustrate
 % typical tasks in practical model development and operation.
 %
+% Runs in IRIS Release 20180131.
+%
 %
 %% Model Files                                                             
 %
