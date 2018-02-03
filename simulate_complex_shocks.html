@@ -1,0 +1,350 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>More Complex Simulation Experiments</title><meta name="generator" content="MATLAB 9.3"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2018-02-03"><meta name="DC.source" content="simulate_complex_shocks.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body { margin-left:5%; margin-right:35% }
+@media print {html body {margin-left:0px; margin-right:0px}}
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+/* tt { font-size: 1.2em; } */
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:1000%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>More Complex Simulation Experiments</h1><!--introduction--><p>Simulate the differences between anticipated and unanticipated future shocks, run experiments with temporarily exogenised variables, and show how easy it is to examine simulations with mutliple different parameterisations.</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Clear Workspace</a></li><li><a href="#2">Load Solved Model Object</a></li><li><a href="#3">Define Dates and Ranges</a></li><li><a href="#4">Simple Consumption Demand Shock</a></li><li><a href="#5">Anticipated vs Unanticipated Consumption Demand Shock</a></li><li><a href="#6">Simulate Consumption Demand Shock with Delayed Policy Reaction</a></li><li><a href="#7">Simulate Consumption Demand Shock with Desired Impact</a></li><li><a href="#8">Simulate Consumption Demand Shocks with Multiple Parameterisations</a></li><li><a href="#9">Show Variables and Objects Created in This File</a></li></ul></div><h2 id="1">Clear Workspace</h2><p>Clear workspace, close all graphics figures, clear command window, and check the IRIS version.</p><pre class="codeinput">clear
+close <span class="string">all</span>
+clc
+irisrequired <span class="string">20180131</span>
+</pre><h2 id="2">Load Solved Model Object</h2><p>Load the solved model object built in <a href="read_model.html">read_model</a>. Run <tt>read_model</tt> at least once before running this m-file.</p><pre class="codeinput">load <span class="string">mat/read_model.mat</span> <span class="string">m</span>
+</pre><h2 id="3">Define Dates and Ranges</h2><pre class="codeinput">startDate = 1;
+endDate = 40;
+plotRng = startDate-1 : startDate+19;
+</pre><h2 id="4">Simple Consumption Demand Shock</h2><pre class="codeinput">d = zerodb(m, startDate-3:startDate);
+d.Ey(startDate) = 0.07;
+s = simulate(m, d, 1:40, <span class="string">'Deviation='</span>, true, <span class="string">'AppendPresample='</span>, true);
+
+plotList = { <span class="keyword">...</span>
+    <span class="string">' "Inflation, Q/Q PA [Pp Dev]" dP^4 '</span>, <span class="keyword">...</span>
+	<span class="string">' "Policy rate, PA [Pp Dev]" R^4 '</span>, <span class="keyword">...</span>
+    <span class="string">' "Output [Pct Level Dev]" Y '</span>, <span class="keyword">...</span>
+    <span class="string">' "Hours Worked [Pct Level Dev]" N '</span>, <span class="keyword">...</span>
+    <span class="string">' "Real Wage [Pct Level Dev]" W/P '</span>, <span class="keyword">...</span>
+    <span class="string">' "Capital Price [Pct Level Dev]" Pk'</span>, <span class="keyword">...</span>
+   };
+dbplot(s, plotRng, plotList, <span class="string">'Tight='</span>, true, <span class="string">'Transform='</span>, @(x) 100*(x-1));
+grfun.ftitle(<span class="string">'Consumption Demand Shocks'</span>);
+</pre><img vspace="5" hspace="5" src="html-source/simulate_complex_shocks_01.png" alt=""> <h2 id="5">Anticipated vs Unanticipated Consumption Demand Shock</h2><p>Simulate a future (3 quarters ahead) aggregate demand shock twice: as anticipated and unanticipated.</p><pre class="codeinput">d = zerodb(m, startDate-3:startDate);
+d.Ey(startDate+3) = 0.07;
+s1 = simulate(m, d, startDate:endDate, <span class="string">'anticipate='</span>, true, <span class="keyword">...</span>
+    <span class="string">'Deviation='</span>, true, <span class="string">'AppendPresample='</span>, true);
+
+s2 = simulate(m, d, startDate:endDate, <span class="string">'anticipate='</span>, false, <span class="keyword">...</span>
+    <span class="string">'Deviation='</span>, true, <span class="string">'AppendPresample='</span>, true);
+
+dbplot(s1 &amp; s2, plotRng, plotList, <span class="keyword">...</span>
+    <span class="string">'Tight='</span>, true, <span class="string">'Transform='</span>, @(x) 100*(x-1));
+grfun.ftitle(<span class="string">'Consumption Demand Shock: Anticipated vs Unanticipated'</span>);
+grfun.bottomlegend(<span class="string">'Anticipated'</span>, <span class="string">'Unanticipated'</span>);
+</pre><img vspace="5" hspace="5" src="html-source/simulate_complex_shocks_02.png" alt=""> <h2 id="6">Simulate Consumption Demand Shock with Delayed Policy Reaction</h2><p>Simulate a consumption shock and, at the same time, delay the policy reaction (by exogenising the policy rate to its pre-shock level for 3 periods). This can be done in an anticipated mode and unanticipated mode.</p><div><ol><li>Simulate consumption shocks with immediate policy reaction.</li><li>Simulate the same shock with delayed policy reaction that is announced and anticipated from the beginning.</li><li>Simulate the same shock with delayed policy reaction that takes everyone by surprise every quarter.</li></ol></div><pre class="codeinput">nPer = 3;
+
+d = zerodb(m, startDate-3:startDate);
+d.Ey(startDate) = 0.07;
+
+sc = plan(m, startDate:endDate);
+sc = exogenize(sc, <span class="string">'R'</span>, startDate:startDate+nPer-1);
+sc = endogenize(sc, <span class="string">'Er'</span>, startDate:startDate+nPer-1);
+d.R(startDate:startDate+nPer-1) = 1;
+
+s1 = simulate(m, d, startDate:endDate, <span class="keyword">...</span>
+   <span class="string">'Deviation='</span>, true, <span class="string">'AppendPresample='</span>, true);
+
+s2 = simulate(m, d, startDate:endDate, <span class="string">'Plan='</span>, sc, <span class="keyword">...</span>
+   <span class="string">'Deviation='</span>, true, <span class="string">'AppendPresample='</span>, true);
+s2 = dbextend(d,s2);
+
+s3 = simulate(m,d,startDate:endDate, <span class="string">'Plan='</span>, sc, <span class="keyword">...</span>
+   <span class="string">'Deviation='</span>,true, <span class="string">'Anticipate='</span>, false, <span class="string">'AppendPresample='</span>, true);
+
+dbplot(s1 &amp; s2 &amp; s3, plotRng, plotList, <span class="keyword">...</span>
+    <span class="string">'Tight='</span>, true, <span class="string">'Transform='</span>, @(x) 100*(x-1));
+grfun.ftitle(<span class="string">'Consumption Demand Shock with Delayed Policy Reaction'</span>);
+grfun.bottomlegend(<span class="string">'No delay'</span>, <span class="string">'Anticipated'</span>, <span class="string">'Unanticipated'</span>);
+</pre><img vspace="5" hspace="5" src="html-source/simulate_complex_shocks_03.png" alt=""> <h2 id="7">Simulate Consumption Demand Shock with Desired Impact</h2><p>Find the size of a consumption demand shock such that it leads to exactly a 1 pct increase in consumption in the first period. Because consumption (C) is a log-linearised variable, specify the 1 pct deviation from its steady state as 1.01.</p><pre class="codeinput">d = zerodb(m, startDate-3:startDate);
+d.Y(startDate) = 1.01;
+
+sc = plan(m, startDate:endDate);
+sc = exogenise(sc, <span class="string">'Y'</span>, startDate);
+sc = endogenise(sc, <span class="string">'Ey'</span>, startDate);
+s = simulate(m, d, startDate:endDate, <span class="string">'Plan='</span>, sc, <span class="keyword">...</span>
+    <span class="string">'Deviation='</span>, true, <span class="string">'AppendPresample='</span>, true);
+
+disp(s.Ey{1:10});
+
+dbplot(s, plotRng, plotList, <span class="string">'Tight='</span>, true, <span class="string">'Transform='</span>, @(x) 100*(x-1));
+grfun.ftitle(<span class="string">'Consumption Demand Shock with Exact Impact'</span>);
+</pre><pre class="codeoutput">	Series object: 10-by-1
+
+	 1:  0.012103
+	 2:         0
+	 3:         0
+	 4:         0
+	 5:         0
+	 6:         0
+	 7:         0
+	 8:         0
+	 9:         0
+	10:         0
+	'Consumption Demand Shock'
+
+	user data: empty
+
+</pre><img vspace="5" hspace="5" src="html-source/simulate_complex_shocks_04.png" alt=""> <h2 id="8">Simulate Consumption Demand Shocks with Multiple Parameterisations</h2><p>Within the same model object, expand the number of parameter variants, and assign different sets of values to some (or all) of the parameters (here, only the values for the parameter <tt>xip</tt> vary, i.e. the price adjustment costs).  Solve and simulate all parameter variants at once. Almost all IRIS model functions support multiple parametert variants.</p><pre class="codeinput">m(1:8) = m;
+m.xip = [140, 160, 180, 200, 220, 240, 260, 280];
+m = solve(m);
+disp(m);
+
+d = zerodb(m, startDate-3:startDate);
+d.Ey(1, :) = 0.07;
+
+s = simulate(m, d, startDate:endDate, <span class="keyword">...</span>
+    <span class="string">'Deviation='</span>, true, <span class="string">'AppendPresample='</span>, true);
+
+dbplot(s, plotRng, plotList, <span class="string">'Tight='</span>, true, <span class="string">'Transform='</span>, @(x) 100*(x-1));
+grfun.ftitle(<span class="string">'Consumption Demand Shock with Mutliple Parameter Variants'</span>);
+</pre><pre class="codeoutput">	nonlinear model object: [8 parameter variant(s)]
+	number of equations: [4 16 4 0 0]
+	solution(s) available: [8 parameter variant(s)]
+	comment: 'Simple SPBC Model File'
+	user data: empty
+	export file(s): [0]
+
+</pre><img vspace="5" hspace="5" src="html-source/simulate_complex_shocks_05.png" alt=""> <h2 id="9">Show Variables and Objects Created in This File</h2><pre class="codeinput">whos
+</pre><pre class="codeoutput">  Name           Size             Bytes  Class     Attributes
+
+  ans            1x1                120  cell                
+  d              1x1              65376  struct              
+  endDate        1x1                  8  double              
+  m              1x8             182429  model               
+  nPer           1x1                  8  double              
+  plotList       1x6               1066  cell                
+  plotRng        1x21               168  double              
+  s              1x1             128096  struct              
+  s1             1x1              25896  struct              
+  s2             1x1              25896  struct              
+  s3             1x1              25896  struct              
+  sc             1x1              12352  plan                
+  startDate      1x1                  8  double              
+
+</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2017b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% More Complex Simulation Experiments
+%
+% Simulate the differences between anticipated and unanticipated future
+% shocks, run experiments with temporarily exogenised variables, and show
+% how easy it is to examine simulations with mutliple different
+% parameterisations.
+
+%% Clear Workspace
+%
+% Clear workspace, close all graphics figures, clear command window, and
+% check the IRIS version.
+
+clear
+close all
+clc
+irisrequired 20180131
+
+%% Load Solved Model Object
+%
+% Load the solved model object built in <read_model.html read_model>. Run
+% |read_model| at least once before running this m-file.
+
+load mat/read_model.mat m
+
+%% Define Dates and Ranges
+
+startDate = 1;
+endDate = 40;
+plotRng = startDate-1 : startDate+19;
+
+%% Simple Consumption Demand Shock
+
+d = zerodb(m, startDate-3:startDate);
+d.Ey(startDate) = 0.07;
+s = simulate(m, d, 1:40, 'Deviation=', true, 'AppendPresample=', true);
+
+plotList = { ...
+    ' "Inflation, Q/Q PA [Pp Dev]" dP^4 ', ...
+	' "Policy rate, PA [Pp Dev]" R^4 ', ...
+    ' "Output [Pct Level Dev]" Y ', ...
+    ' "Hours Worked [Pct Level Dev]" N ', ...
+    ' "Real Wage [Pct Level Dev]" W/P ', ...
+    ' "Capital Price [Pct Level Dev]" Pk', ...
+   };
+dbplot(s, plotRng, plotList, 'Tight=', true, 'Transform=', @(x) 100*(x-1));
+grfun.ftitle('Consumption Demand Shocks');
+
+%% Anticipated vs Unanticipated Consumption Demand Shock
+%
+% Simulate a future (3 quarters ahead) aggregate demand shock twice: as
+% anticipated and unanticipated.
+
+d = zerodb(m, startDate-3:startDate);
+d.Ey(startDate+3) = 0.07;
+s1 = simulate(m, d, startDate:endDate, 'anticipate=', true, ...
+    'Deviation=', true, 'AppendPresample=', true);
+
+s2 = simulate(m, d, startDate:endDate, 'anticipate=', false, ...
+    'Deviation=', true, 'AppendPresample=', true);
+
+dbplot(s1 & s2, plotRng, plotList, ...
+    'Tight=', true, 'Transform=', @(x) 100*(x-1));
+grfun.ftitle('Consumption Demand Shock: Anticipated vs Unanticipated');
+grfun.bottomlegend('Anticipated', 'Unanticipated');
+
+%% Simulate Consumption Demand Shock with Delayed Policy Reaction
+%
+% Simulate a consumption shock and, at the same time, delay the policy
+% reaction (by exogenising the policy rate to its pre-shock level for 3
+% periods). This can be done in an anticipated mode and
+% unanticipated mode.
+%
+% # Simulate consumption shocks with immediate policy reaction.
+% # Simulate the same shock with delayed policy reaction that is announced
+% and anticipated from the beginning.
+% # Simulate the same shock with delayed policy reaction that takes
+% everyone by surprise every quarter.
+
+nPer = 3;
+
+d = zerodb(m, startDate-3:startDate);
+d.Ey(startDate) = 0.07;
+
+sc = plan(m, startDate:endDate);
+sc = exogenize(sc, 'R', startDate:startDate+nPer-1);
+sc = endogenize(sc, 'Er', startDate:startDate+nPer-1);
+d.R(startDate:startDate+nPer-1) = 1;
+
+s1 = simulate(m, d, startDate:endDate, ... 
+   'Deviation=', true, 'AppendPresample=', true);
+
+s2 = simulate(m, d, startDate:endDate, 'Plan=', sc, ... 
+   'Deviation=', true, 'AppendPresample=', true);
+s2 = dbextend(d,s2);
+
+s3 = simulate(m,d,startDate:endDate, 'Plan=', sc, ... 
+   'Deviation=',true, 'Anticipate=', false, 'AppendPresample=', true);
+
+dbplot(s1 & s2 & s3, plotRng, plotList, ...
+    'Tight=', true, 'Transform=', @(x) 100*(x-1));
+grfun.ftitle('Consumption Demand Shock with Delayed Policy Reaction');
+grfun.bottomlegend('No delay', 'Anticipated', 'Unanticipated');
+
+%% Simulate Consumption Demand Shock with Desired Impact
+%
+% Find the size of a consumption demand shock such that it leads to exactly
+% a 1 pct increase in consumption in the first period. Because consumption
+% (C) is a log-linearised variable, specify the 1 pct deviation from its
+% steady state as 1.01.
+
+d = zerodb(m, startDate-3:startDate);
+d.Y(startDate) = 1.01;
+
+sc = plan(m, startDate:endDate);
+sc = exogenise(sc, 'Y', startDate);
+sc = endogenise(sc, 'Ey', startDate);
+s = simulate(m, d, startDate:endDate, 'Plan=', sc, ...
+    'Deviation=', true, 'AppendPresample=', true);
+
+disp(s.Ey{1:10});
+
+dbplot(s, plotRng, plotList, 'Tight=', true, 'Transform=', @(x) 100*(x-1));
+grfun.ftitle('Consumption Demand Shock with Exact Impact');
+
+%% Simulate Consumption Demand Shocks with Multiple Parameterisations
+%
+% Within the same model object, expand the number of parameter variants,
+% and assign different sets of values to some (or all) of the parameters
+% (here, only the values for the parameter |xip| vary, i.e. the price
+% adjustment costs).  Solve and simulate all parameter variants at once.
+% Almost all IRIS model functions support multiple parametert variants.
+
+m(1:8) = m;
+m.xip = [140, 160, 180, 200, 220, 240, 260, 280];
+m = solve(m);
+disp(m);
+
+d = zerodb(m, startDate-3:startDate);
+d.Ey(1, :) = 0.07;
+
+s = simulate(m, d, startDate:endDate, ...
+    'Deviation=', true, 'AppendPresample=', true);
+
+dbplot(s, plotRng, plotList, 'Tight=', true, 'Transform=', @(x) 100*(x-1));
+grfun.ftitle('Consumption Demand Shock with Mutliple Parameter Variants');
+
+
+%% Show Variables and Objects Created in This File                         
+
+whos
+
+
+##### SOURCE END #####
+--></body></html>

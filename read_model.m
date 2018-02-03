@@ -1,40 +1,38 @@
-%% Read and Solve Model
-% by Jaromir Benes
+%% Create and Solve Model Object                                           
 %
-% Create a model object by loading the model file `Simple_SPBC.model`,
-% assign parameters to the model object, find its steady state, and compute
-% the first-order accurate solution. The model object is then saved to a
-% mat file, and ready for further experiments.
-
-%% Clear Workspace
+% Create a model object from the model file <Simple_SPBC.model.html
+% Simple_SPBC.model>, assign parameters to the model object, calculate its
+% steady state, and compute first-order solution matrices.
 %
-% Clear workspace, close all graphics figures, clear command window, and
-% check the IRIS version.
 
-clear;
-close all;
-clc;
-irisrequired 20140315;
-
-if ~exist('MAT', 'dir')
-    mkdir('MAT');
-end
-
-%% Read Model File and Create Model Object
+%% Clear Workspace                                                         
 %
-% The function `model` reads the model file and translates it into a model
-% object, called here `m`. Model objects are complex structures that carry
-% all the information needed about the model, and can be manipulated by
-% calling some of the IRIS functions.
-
-m = Model('simple_SPBC.model');
-
-%% Calibrate Model Parameters
+% Clear the workspace, and check the IRIS version.
 %
-% Assign parameters using the simplest possibly syntax: `m.XXX = YYY;`
-% where `XXX` is the name of a parameters, and `YYY` is its value. Use the
-% function `get` <?get?> to retrieve a database with currently assigned
-% parameter values.
+
+clear
+close all
+clc
+irisrequired 20180131
+
+%% Read Model File and Create Model Object                                 
+%
+% The function |model| reads the model file <Simple_SPBC.model>, and
+% translates it into a model object, called here |m|. Model objects are
+% complex structures that carry all the necessary information about the
+% model, and can be manipulated by calling various IRIS functions.
+
+m = model('simple_SPBC.model');
+disp(m)
+
+
+%% Calibrate Model Parameters                                              
+%
+% Assign parameters using the dot syntax, e.g. |m.gamma = 0.60|| where
+% |gamma| is the name of a parameter, and |0.60| is the value to be
+% assigned. Use the function |get( )| to retrieve a databank with currently
+% assigned parameter values; the parameters that have been assigned no
+% value are |NaN|.
 
 m.alpha = 1.03^(1/4);
 m.beta = 0.985^(1/4);
@@ -63,40 +61,50 @@ m.std_Mp = 0;
 m.std_Mw = 0;
 m.std_Ea = 0.001;
 
-disp('Get a parameter database from the model object');
-get(m,'parameters') %?get?
+disp('Parameter Databank from Model Object:');
+get(m, 'Parameters')
 
-%% Compute Steady State
+
+%% Find Steady State 
 %
-% Compute and numerically check the steady-state values for all model
-% variables. The option `'growth=' true` <?growth?> says this is a
-% non-stationary BGP model where variables can grow at a constant rate over
-% time (the steady-state solution is modified to handle such models).
+% Run |sstate( )| to calculate the steady-state values for all model
+% variables. The option |Growth=true| means this is a non-stationary BGP
+% model where variables can grow at a constant rate over time; the
+% steady-state solution algorithm is modified to handle models with growth.
+% Use |chksstate( )| to numerically verify the steady state values
+% on dynamic equations; if there is a significant numerical discrepancy,
+% the function will throw an error.
+% 
 
-m = sstate(m, 'Growth=', true); %?growth?
+m = sstate(m, 'Growth=', true);
 chksstate(m);
 
-%% Compute First Order Solution
+
+%% Calculate First-Order Solution Matrices                                 
+%
+% Run |solve( )| to calculate a first-order expansion of the model
+% equations around the steady state, and finds a first-order
+% rational-expectations solution. The solution matrices (state-space
+% matrices) are stored within the model object; they are examined in
+% <know_all_about_solution>. The availability of a first-order solution is
+% indicated the model object is displayed.
+%
 
 m = solve(m);
+disp(m)
 
-disp('Solved model')
-m %#ok<NOPTS>
 
-%% Save Model Object
+%% Save Model Object                                                       
 %
-% Save the solved model object to a mat-file (binary file) for future use.
-
-save MAT/read_model.mat m;
-
-%% Help on IRIS Functions Used in This File
+% Save the solved model object to a mat file (internal Matlab binary file)
+% for future use.
 %
-% Use either `help` to display help in the command window, or `idoc`
-% to display help in an HTML browser window.
-%
-%    help model/model
-%    help model/subsasgn
-%    help model/assign
-%    help model/sstate
-%    help model/chksstate
-%    help model/solve
+
+save mat/read_model.mat m
+
+
+%% Show Variables and Objects Created in This File                         
+
+whos
+
+

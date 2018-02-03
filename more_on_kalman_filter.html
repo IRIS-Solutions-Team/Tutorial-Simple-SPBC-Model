@@ -1,0 +1,638 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>More on Kalman Filter</title><meta name="generator" content="MATLAB 9.3"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2018-02-03"><meta name="DC.source" content="more_on_kalman_filter.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body { margin-left:5%; margin-right:35% }
+@media print {html body {margin-left:0px; margin-right:0px}}
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+/* tt { font-size: 1.2em; } */
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:1000%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>More on Kalman Filter</h1><!--introduction--><p>Run more advanced Kalman filter exercises. Split the data sample into two sub-samples, and pass information from one to the other. Run the filter with time-varying std deviations of some shocks. Evaluate the likelihood function and the contributions of individual time periods to the overall likelihood.</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Dependencies</a></li><li><a href="#2">Clear Workspace</a></li><li><a href="#3">Load the estimated model object and the historical database</a></li><li><a href="#4">Split the Kalman filter into sub-samples</a></li><li><a href="#6">Run Kalman Filter with Time Varying Std Devs of Some Shocks</a></li><li><a href="#7">Evaluate Likelihood Function and Contributions of Individual Time Periods</a></li><li><a href="#11">Show Variables and Objects Created in This File</a></li></ul></div><h2 id="1">Dependencies</h2><p>Run the following m-files before this one:</p><div><ul><li><a href="read_data.html"><tt>read_data</tt></a></li><li><a href="estimate_params.html"><tt>estimate_params</tt></a></li></ul></div><h2 id="2">Clear Workspace</h2><p>Clear workspace, close all graphics figures, clear command window, and check the IRIS version.</p><pre class="codeinput">clear
+close <span class="string">all</span>
+clc
+irisrequired <span class="string">20180131</span>
+</pre><h2 id="3">Load the estimated model object and the historical database</h2><p>Load the model object estimated in <tt>estimate_params.m</tt>, and the historical database created in <tt>read_data</tt>.</p><pre class="codeinput">load <span class="string">mat/estimate_params.mat</span> <span class="string">mest</span>
+load <span class="string">mat/read_data.mat</span> <span class="string">d</span> <span class="string">startHist</span> <span class="string">endHist</span>
+</pre><h2 id="4">Split the Kalman filter into sub-samples</h2><p>With the range split into two or more sub-samples, and the Kalman filter-smoother executed successively on each of them (using the most recent result as the initial condition for the next run), the smoothed data estimates will differ from those obtained previously (running the filter once on the whole range). This is because the individual runs of the filter of data will be based on different information sets.</p><p>The only exception is, obviously, the last sub-sample, which is by construction based on information from the entire range 1..T, and hence identical to the information set when the filter is run just once on the entire range.</p><p>When running the Kalman filter on the last sub-sambple, the output database from the previous run, <tt>f1</tt>, is used to set up initical condition for the filter (instead of the default asymptotic distribution). This is allowed by the fact that the database <tt>f1</tt> contains both the point estimates and the MSE matrices.</p><pre class="codeinput">[~, f0, v0, ~, pe0] = filter(mest, d, startHist:endHist+10, <span class="keyword">...</span>
+    <span class="string">'Relative='</span>, false);
+
+N = 15;
+
+[~, f1, v1, ~, pe1] = filter(mest, d, startHist:endHist-N, <span class="keyword">...</span>
+    <span class="string">'Relative='</span>, false);
+
+f1
+
+[~, f2, v2, ~, pe2] = filter(mest, d, endHist-N+1:endHist, <span class="keyword">...</span>
+    <span class="string">'Relative='</span>, false, <span class="string">'InitCond='</span>, f1);
+</pre><p>Print differences between the smoothed data.</p><pre class="codeinput">disp(<span class="string">'Smoothed estimates differ for the first sub-sample'</span>);
+dbfun(@maxabs, f0.mean, f1.mean)
+dbfun(@maxabs, pe0, pe1)
+
+disp(<span class="string">'Smoothed estimates are identical for the last sub-sample'</span>);
+dbfun(@maxabs, f0.mean, f2.mean)
+dbfun(@maxabs, pe0, pe1)
+</pre><pre class="codeoutput">
+f1 = 
+
+  struct with fields:
+
+    mean: [1x1 struct]
+     std: [1x1 struct]
+     mse: [49x13x13 Series]
+
+Smoothed estimates differ for the first sub-sample
+
+ans = 
+
+  struct with fields:
+
+          Short: 0
+           Infl: 0
+         Growth: 0
+           Wage: 0
+              Y: 0.0024
+              N: 0.0018
+              W: 0.0039
+              Q: 0.0038
+              H: 0.0028
+              A: 0.0019
+             dA: 3.5772e-04
+              P: 0.0017
+              R: 2.8891e-06
+             Pk: 0.0072
+             Rk: 1.5839e-04
+         Lambda: 0.0025
+             dP: 1.2129e-04
+            d4P: 5.0499e-04
+             dW: 1.0965e-04
+            RMC: 0.0042
+             Mp: 0
+             Mw: 0
+             Ey: 4.0658e-04
+             Ep: 2.7376e-04
+             Ea: 7.2493e-05
+             Er: 1.1491e-04
+             Ew: 8.1703e-04
+          alpha: 0
+           beta: 0
+          gamma: 0
+          delta: 0
+              k: 0
+             pi: 0
+            eta: 0
+            psi: 0
+            chi: 0
+            xiw: 0
+            xip: 0
+           rhoa: 0
+           rhor: 0
+         kappap: 0
+         kappan: 0
+         Short_: 0
+          Infl_: 0
+        Growth_: 0
+          Wage_: 0
+         ttrend: 0
+         std_Mp: 0
+         std_Mw: 0
+         std_Ey: 0
+         std_Ep: 0
+         std_Ea: 0
+         std_Er: 0
+         std_Ew: 0
+    corr_Ep__Er: 0
+
+
+ans = 
+
+  struct with fields:
+
+     Short: 0
+      Infl: 0
+    Growth: 0
+      Wage: 0
+
+Smoothed estimates are identical for the last sub-sample
+
+ans = 
+
+  struct with fields:
+
+          Short: 0
+           Infl: 0
+         Growth: 0
+           Wage: 0
+              Y: 6.6613e-16
+              N: 4.4409e-16
+              W: 2.6645e-15
+              Q: 4.4409e-16
+              H: 8.8818e-16
+              A: 6.6613e-16
+             dA: 2.2204e-16
+              P: 6.6613e-16
+              R: 0
+             Pk: 2.2204e-15
+             Rk: 5.5511e-17
+         Lambda: 6.1062e-16
+             dP: 2.2204e-16
+            d4P: 4.4409e-16
+             dW: 2.2204e-16
+            RMC: 2.2204e-16
+             Mp: 0
+             Mw: 0
+             Ey: 1.3010e-16
+             Ep: 9.0206e-17
+             Ea: 3.2960e-17
+             Er: 7.8659e-17
+             Ew: 1.1623e-16
+          alpha: 0
+           beta: 0
+          gamma: 0
+          delta: 0
+              k: 0
+             pi: 0
+            eta: 0
+            psi: 0
+            chi: 0
+            xiw: 0
+            xip: 0
+           rhoa: 0
+           rhor: 0
+         kappap: 0
+         kappan: 0
+         Short_: 0
+          Infl_: 0
+        Growth_: 0
+          Wage_: 0
+         ttrend: 0
+         std_Mp: 0
+         std_Mw: 0
+         std_Ey: 0
+         std_Ep: 0
+         std_Ea: 0
+         std_Er: 0
+         std_Ew: 0
+    corr_Ep__Er: 0
+
+
+ans = 
+
+  struct with fields:
+
+     Short: 0
+      Infl: 0
+    Growth: 0
+      Wage: 0
+
+</pre><h2 id="6">Run Kalman Filter with Time Varying Std Devs of Some Shocks</h2><p>Use the option <tt>Vary=</tt> to temporarily change some of the std deviations (or also cross-correlations) within the filtered sample. The estimates of unobservables and shocks will obviously change: Compare the estimated <tt>Ep</tt> shocks from the previous Kalman filter (with fixed std deviations) and the Kalman filter with time-varying <tt>std_Ep</tt>.</p><pre class="codeinput">j = struct( );
+j.std_Ep = tseries( );
+j.std_Ep(endHist-9:endHist-5) = linspace(0.00, 0.4, 5);
+
+[~, f1] = filter(mest, d, startHist:endHist, <span class="string">'Vary='</span>, j);
+
+[j.std_Ep, f1.mean.Ep, f0.mean.Ep]
+</pre><pre class="codeoutput">
+ans = 
+
+	tseries object: 73-by-3
+
+	1995Q2:  NaN  -0.001157655  -0.001196078
+	1995Q3:  NaN  -0.002590551 -0.0009767455
+	1995Q4:  NaN -0.0009212505   0.000591179
+	1996Q1:  NaN  -0.001204264  0.0002191671
+	1996Q2:  NaN   -0.00372323  -0.002374838
+	1996Q3:  NaN -0.0002864607   0.001000264
+	1996Q4:  NaN  -0.001901237 -0.0006643238
+	1997Q1:  NaN -0.0008221908  0.0003749656
+	1997Q2:  NaN  -0.001888295 -0.0007225975
+	1997Q3:  NaN  -0.003426451  -0.002285491
+	1997Q4:  NaN -0.0007976768  0.0003239242
+	1998Q1:  NaN   -0.00431303  -0.003206522
+	1998Q2:  NaN -0.0009051125  0.0001896645
+	1998Q3:  NaN -0.0003601914  0.0007254957
+	1998Q4:  NaN  -0.003075383  -0.001996717
+	1999Q1:  NaN  -8.68115e-05  0.0009864544
+	1999Q2:  NaN  -0.001562807 -0.0004936699
+	1999Q3:  NaN  -0.002426441  -0.001360429
+	1999Q4:  NaN -0.0008938641  0.0001698194
+	2000Q1:  NaN    0.00301119   0.004073189
+	2000Q2:  NaN  -0.003600624  -0.002539775
+	2000Q3:  NaN  0.0003677959   0.001427951
+	2000Q4:  NaN  -0.001476847 -0.0004169741
+	2001Q1:  NaN    0.00185713   0.002917112
+	2001Q2:  NaN -4.269422e-05   0.001017797
+	2001Q3:  NaN   -0.00430092  -0.003239486
+	2001Q4:  NaN  -0.001348267 -0.0002853929
+	2002Q1:  NaN -4.121691e-05    0.00102369
+	2002Q2:  NaN  6.958025e-05    0.00113725
+	2002Q3:  NaN  -0.001064215  7.130073e-06
+	2002Q4:  NaN  0.0005946693    0.00167085
+	2003Q1:  NaN  0.0008641859   0.001946683
+	2003Q2:  NaN  -0.005435381  -0.004344666
+	2003Q3:  NaN   0.001448342   0.002549722
+	2003Q4:  NaN  -0.001157025 -4.182807e-05
+	2004Q1:  NaN   0.002780396   0.003913473
+	2004Q2:  NaN -0.0003737175  0.0007824742
+	2004Q3:  NaN  -0.001849725 -0.0006636801
+	2004Q4:  NaN -0.0003794243   0.000845137
+	2005Q1:  NaN   0.001948832   0.003223024
+	2005Q2:  NaN  -0.002871883  -0.001533844
+	2005Q3:  NaN   0.003881094   0.005301104
+	2005Q4:  NaN   -0.00188925 -0.0003642961
+	2006Q1:  NaN  -0.001222748  0.0004360716
+	2006Q2:  NaN   0.001262701   0.003091432
+	2006Q3:  NaN  -0.001509968  0.0005329713
+	2006Q4:  NaN  -0.004214323  -0.001903854
+	2007Q1:  NaN    0.00622476   0.008864955
+	2007Q2:  NaN  -0.004119115  -0.001080282
+	2007Q3:  NaN  -0.005108975  -0.001602006
+	2007Q4:  NaN  -0.006063436  -0.002031854
+	2008Q1:  NaN    -0.0012338   0.003338625
+	2008Q2:  NaN -0.0008340996   0.004203541
+	2008Q3:    0             0     0.0052408
+	2008Q4:  0.1   -0.01983933   -0.01478491
+	2009Q1:  0.2   0.001312369   0.005910067
+	2009Q2:  0.3  -0.006264358  -0.002208319
+	2009Q3:  0.4  -0.003039557  0.0004822799
+	2009Q4:  NaN  -0.007102629  -0.004065679
+	2010Q1:  NaN  -0.000856905   0.001759088
+	2010Q2:  NaN -0.0006244862   0.001634099
+	2010Q3:  NaN  -0.002150195 -0.0001934138
+	2010Q4:  NaN  -0.007735245  -0.006036109
+	2011Q1:  NaN           NaN             0
+	2011Q2:  NaN           NaN             0
+	2011Q3:  NaN           NaN             0
+	2011Q4:  NaN           NaN             0
+	2012Q1:  NaN           NaN             0
+	2012Q2:  NaN           NaN             0
+	2012Q3:  NaN           NaN             0
+	2012Q4:  NaN           NaN             0
+	2013Q1:  NaN           NaN             0
+	2013Q2:  NaN           NaN             0
+
+    ''    'Cost Push Shock'    'Cost Push Shock'
+
+	user data: empty
+
+</pre><h2 id="7">Evaluate Likelihood Function and Contributions of Individual Time Periods</h2><p>Run the function <tt>loglik( )</tt> to evaluate the likelihood function. This function calls the very same Kalman filter as the function <tt>filter( )</tt>. The first output argument returned by <tt>loglik( )</tt> is minus the logarithm of the likelihood function; this value is also used as a criterion to be minimized (which means maximizing likelihood) within the function <tt>estimate( )</tt>.</p><p>Set the option <tt>ObjDecomp=true</tt> to obtain not only the overall likelihood, but also the contributions of individual time periods. They are stowed in a column vector with the overall likelihood at the top; the length of the vector is therefore <img src="html-source/more_on_kalman_filter_eq06903002941747174998.png" alt="$nPer+1$" style="width:44px;height:9px;"> where <img src="html-source/more_on_kalman_filter_eq01397323798390037733.png" alt="$nPer$" style="width:25px;height:8px;"> is the number of periods over which the filter is run.</p><pre class="codeinput">range = startHist:endHist+10;
+nPer = length(range)
+
+mll = loglik(mest, d, range, <span class="string">'Relative='</span>, false, <span class="keyword">...</span>
+    <span class="string">'ObjDecomp='</span>, true);
+
+size(mll)
+</pre><p>Because there were no observations available in the input database <tt>d</tt> in the last 10 periods of the filter range, i.e. <tt>endHist+1:endHist+10</tt>, the contributions of these last 10 periods are zero.</p><pre class="codeinput">mll
+</pre><p>Adding up the individual contributions reproduces, of course, the overall likelihood. The following two numbers are the same (up to rounding errors):</p><pre class="codeinput">mll(1)
+sum(mll(2:end))
+</pre><p>Visualize the contributions by converting them to a tseries object, and plotting as a bar graph. Large bars denote periods where the model performed poorly (rememeber, this is MINUS the log likelihood, ie. the larger the number the smaller the actual likelihood). Again, the last 10 periods are zeros because no observations were available in the input database in those.</p><pre class="codeinput">x = tseries(range, mll(2:end));
+bar(x);
+grid <span class="string">on</span>;
+title(<span class="string">'Contributions of Individual Time Periods to (Minus Log) Likelihood'</span>);
+</pre><pre class="codeoutput">
+nPer =
+
+    73
+
+
+ans =
+
+    74     1
+
+
+mll =
+
+  352.9612
+    9.9503
+    5.0393
+    4.4839
+    3.6867
+    6.1652
+    4.3730
+    3.9290
+    3.9484
+    4.9862
+    5.5250
+    4.5446
+    5.3863
+    3.8456
+    4.2384
+    6.1810
+    4.0255
+    3.6727
+    4.3557
+    6.0550
+    5.3303
+    6.4054
+    4.7707
+    4.3596
+    8.0969
+    6.5429
+    6.4399
+    6.2084
+    4.5691
+    3.7560
+    4.4403
+    5.2425
+    5.6451
+    5.4568
+    6.0202
+    5.2685
+    5.5157
+    4.3413
+    3.6576
+    4.0793
+    4.3999
+    3.7106
+    5.1212
+    3.7563
+    5.0647
+    4.1894
+    4.9356
+    4.4621
+    7.4583
+    3.8506
+    3.8373
+    6.0688
+    9.7746
+    6.4635
+    8.8161
+   21.1460
+   11.6317
+    7.8568
+    6.4833
+    4.9257
+    4.1563
+    4.2286
+    3.9867
+    6.0987
+         0
+         0
+         0
+         0
+         0
+         0
+         0
+         0
+         0
+         0
+
+
+ans =
+
+  352.9612
+
+
+ans =
+
+  352.9612
+
+</pre><img vspace="5" hspace="5" src="html-source/more_on_kalman_filter_01.png" alt=""> <h2 id="11">Show Variables and Objects Created in This File</h2><pre class="codeinput">whos
+</pre><pre class="codeoutput">  Name            Size             Bytes  Class          Attributes
+
+  N               1x1                  8  double                   
+  ans             1x1                  8  double                   
+  d               1x1              15480  struct                   
+  endHist         1x1                  8  DateWrapper              
+  f0              1x1             179944  struct                   
+  f1              1x1             162504  struct                   
+  f2              1x1              78792  struct                   
+  j               1x1                392  struct                   
+  mest            1x1              90932  model                    
+  mll            74x1                592  double                   
+  nPer            1x1                  8  double                   
+  pe0             1x1               3462  struct                   
+  pe1             1x1               2982  struct                   
+  pe2             1x1               1926  struct                   
+  range           1x73               584  DateWrapper              
+  startHist       1x1                  8  DateWrapper              
+  v0              1x1                  8  double                   
+  v1              1x1                  8  double                   
+  v2              1x1                  8  double                   
+  x              73x1                760  tseries                  
+
+</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2017b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% More on Kalman Filter
+%
+% Run more advanced Kalman filter exercises. Split the data sample into two
+% sub-samples, and pass information from one to the other. Run the filter
+% with time-varying std deviations of some shocks. Evaluate the likelihood
+% function and the contributions of individual time periods to the overall
+% likelihood.
+%
+
+%% Dependencies                                                            
+%
+% Run the following m-files before this one:
+%
+% * <read_data.html |read_data|>
+% * <estimate_params.html |estimate_params|>
+%
+
+
+%% Clear Workspace
+%
+% Clear workspace, close all graphics figures, clear command window, and
+% check the IRIS version.
+
+clear
+close all
+clc
+irisrequired 20180131
+
+%% Load the estimated model object and the historical database
+%
+% Load the model object estimated in |estimate_params.m|, and the
+% historical database created in |read_data|. 
+
+load mat/estimate_params.mat mest
+load mat/read_data.mat d startHist endHist
+
+
+%% Split the Kalman filter into sub-samples
+%
+% With the range split into two or more sub-samples, and the Kalman
+% filter-smoother executed successively on each of them (using the most
+% recent result as the initial condition for the next run), the smoothed
+% data estimates will differ from those obtained previously (running the
+% filter once on the whole range). This is because the individual runs of
+% the filter of data will be based on different information sets.
+%
+% The only exception is, obviously, the last sub-sample, which is by
+% construction based on information from the entire range 1..T, and hence
+% identical to the information set when the filter is run just once on the
+% entire range.
+%
+% When running the Kalman filter on the last sub-sambple, the
+% output database from the previous run, |f1|, is used to set up initical
+% condition for the filter (instead of the default asymptotic
+% distribution). This is allowed by the fact that the database |f1|
+% contains both the point estimates and the MSE matrices.
+
+[~, f0, v0, ~, pe0] = filter(mest, d, startHist:endHist+10, ...
+    'Relative=', false);
+
+N = 15;
+
+[~, f1, v1, ~, pe1] = filter(mest, d, startHist:endHist-N, ...
+    'Relative=', false);
+
+f1 
+
+[~, f2, v2, ~, pe2] = filter(mest, d, endHist-N+1:endHist, ...
+    'Relative=', false, 'InitCond=', f1); 
+
+%%%
+%
+% Print differences between the smoothed data.
+%
+
+disp('Smoothed estimates differ for the first sub-sample');
+dbfun(@maxabs, f0.mean, f1.mean)
+dbfun(@maxabs, pe0, pe1)
+
+disp('Smoothed estimates are identical for the last sub-sample');
+dbfun(@maxabs, f0.mean, f2.mean)
+dbfun(@maxabs, pe0, pe1)
+
+%% Run Kalman Filter with Time Varying Std Devs of Some Shocks
+%
+% Use the option |Vary=| to temporarily change some of the std deviations
+% (or also cross-correlations) within the filtered sample. The estimates of
+% unobservables and shocks will obviously change: Compare the estimated
+% |Ep| shocks from the previous Kalman filter (with fixed std deviations)
+% and the Kalman filter with time-varying |std_Ep|.
+
+j = struct( );
+j.std_Ep = tseries( );
+j.std_Ep(endHist-9:endHist-5) = linspace(0.00, 0.4, 5);
+
+[~, f1] = filter(mest, d, startHist:endHist, 'Vary=', j);
+
+[j.std_Ep, f1.mean.Ep, f0.mean.Ep] 
+
+
+%% Evaluate Likelihood Function and Contributions of Individual Time Periods
+%
+% Run the function |loglik( )| to evaluate the likelihood function. This
+% function calls the very same Kalman filter as the function |filter( )|.
+% The first output argument returned by |loglik( )| is minus the logarithm
+% of the likelihood function; this value is also used as a criterion to be
+% minimized (which means maximizing likelihood) within the function
+% |estimate( )|.
+%
+% Set the option |ObjDecomp=true| to obtain not only the overall
+% likelihood, but also the contributions of individual time periods. They
+% are stowed in a column vector with the overall likelihood at the top; the
+% length of the vector is therefore $nPer+1$ where $nPer$ is the number of
+% periods over which the filter is run.
+
+range = startHist:endHist+10;
+nPer = length(range)
+
+mll = loglik(mest, d, range, 'Relative=', false, ...
+    'ObjDecomp=', true); 
+
+size(mll) 
+
+%%%
+%
+% Because there were no observations available in the input database |d| in
+% the last 10 periods of the filter range, i.e. |endHist+1:endHist+10|, the
+% contributions of these last 10 periods are zero.
+
+mll 
+
+%%%
+%
+% Adding up the individual contributions reproduces, of course, the overall
+% likelihood. The following two numbers are the same (up to rounding
+% errors):
+
+mll(1)    
+sum(mll(2:end))
+
+
+%%%
+%
+% Visualize the contributions by converting them to a tseries object, and
+% plotting as a bar graph. Large bars denote periods where the model
+% performed poorly (rememeber, this is MINUS the log likelihood, ie. the
+% larger the number the smaller the actual likelihood). Again, the last 10
+% periods are zeros because no observations were available in the input
+% database in those.
+
+x = tseries(range, mll(2:end));
+bar(x);
+grid on;
+title('Contributions of Individual Time Periods to (Minus Log) Likelihood');
+
+%% Show Variables and Objects Created in This File                         
+
+whos
+
+
+##### SOURCE END #####
+--></body></html>

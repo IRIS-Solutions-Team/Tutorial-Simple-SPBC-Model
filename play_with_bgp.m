@@ -1,5 +1,4 @@
-%% Find and Describe Balanced Growth Path
-% by Jaromir Benes
+%% Calculate and Describe Balanced Growth Path
 %
 % The SPBC.model is a BGP model: It does not have a stationary long run.
 % Instead, it has two unit roots, introduced through the productivity
@@ -7,46 +6,54 @@
 % there is absolutely no need to stationarise them. They can be worked with
 % directly in their non-stationary forms.
 
+%% Dependencies
+%
+% Run the following m-files before this one:
+%
+% * <read_model.html read_model>
+%
+
 %% Clear Workspace
 %
 % Clear workspace, close all graphics figures, clear command window, and
 % check the IRIS version.
+%
 
-clear;
-close all;
-clc;
-irisrequired 20140315;
+clear
+close all
+clc
+irisrequired 20140315
+
 
 %% Load Solved Model Object
 %
-% Load the solved model object built in `read_model`. Run `read_model` at
-% least once before running this m-file.
+% Load the solved model object built in <read_model.html read_model>. 
+%
 
-load MAT/read_model.mat m;
+load mat/read_model.mat m
 
 %% Compute Two Different Points on BGP
 %
 % Compute two different points on the BGP corresponding to two different
-% levels of productivity, `A`. The resulting steady-state levels of other
-% varibles are always in constant proportion to the level of `A` (here, 
-% they simply double). The steady-state growth rates remain, obviously, 
-% unchanged. Whenever some variables are fixed in `sstate`, the steady
-% state must be solved for non-recursively, i.e. with `'blocks=' false`
-% <?blocksFalse?>; this is the default setting, and can be therefore
-% omitted.
+% levels of productivity, |A|. The resulting steady-state levels of other
+% varibles are always in constant proportion to the level of |A| (here,
+% they simply double). The steady-state growth rates remain, obviously,
+% unchanged. Whenever some variables are fixed in |sstate( )|, the steady
+% state must be solved for non-recursively, i.e. with |Blocks=false|; this
+% is the default setting, and can be therefore omitted.
 
 m1 = m;
 m1.A = 2;
 m1 = sstate(m1, ...
     'Growth=', true, 'Blocks=', false, 'FixLevel=', 'A', ...
-    'Solver=', 'IRIS'); %?blocksFalse?
+    'Solver=', 'IRIS'); 
 chksstate(m1);
 
 m2 = m;
 m2.A = 4;
 m2 = sstate(m2, ...
     'Growth=', true, 'Blocks=', false, 'FixLevel=', 'A', ...
-    'Solver=', 'IRIS'); %?blocksFalse?
+    'Solver=', 'IRIS'); 
 chksstate(m2); 
 
 disp('Productivity level and gross rate of growth')
@@ -97,15 +104,7 @@ s2 = dbextend(d2, s2);
 [s1.Y, s2.Y, s1.Y-s2.Y] %#ok<NOPTS>
 maxabs(s1, s2)
 
-%% Help on IRIS Functions Used in This File
-%
-% Use either `help` to display help in the command window, or `idoc`
-% to display help in an HTML browser window.
-%
-%    help model/sstate
-%    help model/solve
-%    help model/acf
-%    help model/subsasgn
-%    help model/subsref
-%    help model/zerodb
-%    help model/simulate
+
+%% Show Variables and Objects Created in This File                         
+
+whos

@@ -1,0 +1,379 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>Create and Solve Model Object</title><meta name="generator" content="MATLAB 9.3"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2018-02-03"><meta name="DC.source" content="read_model.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body { margin-left:5%; margin-right:35% }
+@media print {html body {margin-left:0px; margin-right:0px}}
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+/* tt { font-size: 1.2em; } */
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:1000%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>Create and Solve Model Object</h1><!--introduction--><p>Create a model object from the model file <a href="Simple_SPBC.model.html">Simple_SPBC.model</a>, assign parameters to the model object, calculate its steady state, and compute first-order solution matrices.</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Clear Workspace</a></li><li><a href="#2">Read Model File and Create Model Object</a></li><li><a href="#3">Calibrate Model Parameters</a></li><li><a href="#4">Find Steady State</a></li><li><a href="#5">Calculate First-Order Solution Matrices</a></li><li><a href="#6">Save Model Object</a></li><li><a href="#7">Show Variables and Objects Created in This File</a></li></ul></div><h2 id="1">Clear Workspace</h2><p>Clear the workspace, and check the IRIS version.</p><pre class="codeinput">clear
+close <span class="string">all</span>
+clc
+irisrequired <span class="string">20180131</span>
+</pre><h2 id="2">Read Model File and Create Model Object</h2><p>The function <tt>model</tt> reads the model file <a href="Simple_SPBC.model">Simple_SPBC.model</a>, and translates it into a model object, called here <tt>m</tt>. Model objects are complex structures that carry all the necessary information about the model, and can be manipulated by calling various IRIS functions.</p><pre class="codeinput">m = model(<span class="string">'simple_SPBC.model'</span>);
+disp(m)
+</pre><pre class="codeoutput">	nonlinear model object: [1 parameter variant(s)]
+	number of equations: [4 16 4 0 0]
+	solution(s) available: [0 parameter variant(s)]
+	comment: 'Simple SPBC Model File'
+	user data: empty
+	export file(s): [0]
+
+</pre><h2 id="3">Calibrate Model Parameters</h2><p>Assign parameters using the dot syntax, e.g. <tt>m.gamma = 0.60</tt>| where <tt>gamma</tt> is the name of a parameter, and <tt>0.60</tt> is the value to be assigned. Use the function <tt>get( )</tt> to retrieve a databank with currently assigned parameter values; the parameters that have been assigned no value are <tt>NaN</tt>.</p><pre class="codeinput">m.alpha = 1.03^(1/4);
+m.beta = 0.985^(1/4);
+m.gamma = 0.60;
+m.delta = 0.03;
+m.pi = 1.025^(1/4);
+m.eta = 6;
+m.k = 10;
+m.psi = 0.25;
+
+m.chi = 0.85;
+m.xiw = 60;
+m.xip = 300;
+m.rhoa = 0.90;
+
+m.rhor = 0.85;
+m.kappap = 3.5;
+m.kappan = 0;
+
+m.Short_ = 0;
+m.Infl_ = 0;
+m.Growth_ = 0;
+m.Wage_ = 0;
+
+m.std_Mp = 0;
+m.std_Mw = 0;
+m.std_Ea = 0.001;
+
+disp(<span class="string">'Parameter Databank from Model Object:'</span>);
+get(m, <span class="string">'Parameters'</span>)
+</pre><pre class="codeoutput">Parameter Databank from Model Object:
+
+ans = 
+
+  struct with fields:
+
+      alpha: 1.0074
+       beta: 0.9962
+      gamma: 0.6000
+      delta: 0.0300
+          k: 10
+         pi: 1.0062
+        eta: 6
+        psi: 0.2500
+        chi: 0.8500
+        xiw: 60
+        xip: 300
+       rhoa: 0.9000
+       rhor: 0.8500
+     kappap: 3.5000
+     kappan: 0
+     Short_: 0
+      Infl_: 0
+    Growth_: 0
+      Wage_: 0
+     std_Mp: 0
+     std_Mw: 0
+     std_Ey: 0.0100
+     std_Ep: 0.0100
+     std_Ea: 1.0000e-03
+     std_Er: 0.0100
+     std_Ew: 0.0100
+
+</pre><h2 id="4">Find Steady State</h2><p>Run <tt>sstate( )</tt> to calculate the steady-state values for all model variables. The option <tt>Growth=true</tt> means this is a non-stationary BGP model where variables can grow at a constant rate over time; the steady-state solution algorithm is modified to handle models with growth. Use <tt>chksstate( )</tt> to numerically verify the steady state values on dynamic equations; if there is a significant numerical discrepancy, the function will throw an error.</p><pre class="codeinput">m = sstate(m, <span class="string">'Growth='</span>, true);
+chksstate(m);
+</pre><pre class="codeoutput">
+  Iter Fn-Count       Fn-Norm Lambda     Step-Size   Fn-Norm-Chg     Max-X-Chg Max-Jacob-Chg
+                    norm(x,2) Hybrid                                              Analytical
+--------------------------------------------------------------------------------------------
+     0        1     0.0353553    NaN           NaN           NaN             0           NaN
+     1        7   0.000445648    0.1             1    -0.0349097       0.00625       0.10126
+     2       13   6.84757e-08    0.1             1  -0.000445579    7.6835e-05    0.00126029
+     3       19   1.25607e-15    0.1             1  -6.84757e-08   1.18097e-08   1.93679e-07
+     4       25             0    0.1             1  -1.25607e-15    2.1684e-16   3.55271e-15
+
+Successfully converged. Both step tolerance and function tolerance satisfied.
+
+
+  Iter Fn-Count       Fn-Norm Lambda     Step-Size   Fn-Norm-Chg     Max-X-Chg Max-Jacob-Chg
+                    norm(x,2) Hybrid                                              Analytical
+--------------------------------------------------------------------------------------------
+     0        1      0.242041    NaN           NaN           NaN             0           NaN
+     1        8      0.017452      0             1     -0.224589      0.166667       1.28865
+     2       15    0.00012463      0             1    -0.0173274      0.015533     0.0743236
+     3       22    7.4363e-09      0             1  -0.000124623   0.000121893   0.000259053
+     4       29   1.11022e-16      0             1   -7.4363e-09   7.42961e-09   7.42961e-09
+     5       36             0      0             1  -1.11022e-16   1.11022e-16   1.11022e-16
+
+Successfully converged. Both step tolerance and function tolerance satisfied.
+
+
+  Iter Fn-Count       Fn-Norm Lambda     Step-Size   Fn-Norm-Chg     Max-X-Chg Max-Jacob-Chg
+                    norm(x,2) Hybrid                                              Analytical
+--------------------------------------------------------------------------------------------
+     0        1    0.00104506    NaN           NaN           NaN             0           NaN
+     1        8   1.36739e-14      0             1   -0.00104506     0.0073897             0
+     2       15   1.67703e-16      0             1  -1.35062e-14   2.87478e-13             0
+
+Successfully converged. Both step tolerance and function tolerance satisfied.
+
+
+  Iter Fn-Count       Fn-Norm Lambda     Step-Size   Fn-Norm-Chg     Max-X-Chg Max-Jacob-Chg
+                    norm(x,2) Hybrid                                              Analytical
+--------------------------------------------------------------------------------------------
+     0        1     0.0104893    NaN           NaN           NaN             0           NaN
+     1        7   3.89964e-05    100             1    -0.0104503    0.00741707    0.00744465
+     2       13   5.33677e-10    0.1             1  -3.89959e-05   2.73708e-05   2.75742e-05
+     3       19             0    0.1             1  -5.33677e-10   3.74588e-10   3.77367e-10
+     4       25             0    0.1             1             0             0             0
+
+Successfully converged. Both step tolerance and function tolerance satisfied.
+
+
+  Iter Fn-Count       Fn-Norm Lambda     Step-Size   Fn-Norm-Chg     Max-X-Chg Max-Jacob-Chg
+                    norm(x,2) Hybrid                                              Analytical
+--------------------------------------------------------------------------------------------
+     0        1       1.34181    NaN           NaN           NaN             0           NaN
+     1        8      0.209449    100             1      -1.13236       0.56654       7.97306
+     2       15    0.00455717    100             1     -0.204892     0.0505633       1.24474
+     3       22   5.01701e-07      0             1   -0.00455667   0.000214179     0.0185673
+     4       29   1.44238e-13      0             1  -5.01701e-07   3.79563e-08   5.01095e-06
+     5       36    7.4476e-16      0             1  -1.43493e-13   1.24121e-14   1.84741e-12
+
+Successfully converged. Both step tolerance and function tolerance satisfied.
+
+
+  Iter Fn-Count       Fn-Norm Lambda     Step-Size   Fn-Norm-Chg     Max-X-Chg Max-Jacob-Chg
+                    norm(x,2) Hybrid                                              Analytical
+--------------------------------------------------------------------------------------------
+     0        1       13.3575    NaN           NaN           NaN             0           NaN
+     1       11       1.21087      0        2.0736      -12.1466       1.96633       85.7832
+     2       20     0.0519358      0          1.44      -1.15893      0.907789       8.07866
+     3       27    0.00196502      0             1    -0.0499708     0.0838445      0.209851
+     4       34   3.58576e-06      0             1   -0.00196143    0.00371774    0.00366999
+     5       41   1.24147e-11      0             1  -3.58575e-06   6.92795e-06   3.58395e-06
+     6       48   8.88178e-16      0             1  -1.24139e-11   2.39986e-11   1.24147e-11
+     7       55   4.44089e-16      0             1  -4.44089e-16   1.49186e-16   1.33227e-14
+
+Successfully converged. Both step tolerance and function tolerance satisfied.
+
+
+  Iter Fn-Count       Fn-Norm Lambda     Step-Size   Fn-Norm-Chg     Max-X-Chg Max-Jacob-Chg
+                    norm(x,2) Hybrid                                              Analytical
+--------------------------------------------------------------------------------------------
+     0        1     0.0076198    NaN           NaN           NaN             0           NaN
+     1        8    0.00260284    100             1   -0.00501696        0.4317      0.393563
+     2       15   8.01481e-05    100             1    -0.0025227     0.0105792     0.0513894
+     3       22   3.38584e-07      0             1  -7.98095e-05    0.00491132    0.00540559
+     4       29   4.42223e-13      0             1  -3.38584e-07   1.88701e-06   2.51668e-06
+     5       36   3.51083e-16      0             1  -4.41872e-13   3.21294e-11   4.62403e-11
+     6       43   1.11022e-16      0             1  -2.40061e-16   2.25375e-14    2.4869e-14
+
+Successfully converged. Both step tolerance and function tolerance satisfied.
+
+
+  Iter Fn-Count       Fn-Norm Lambda     Step-Size   Fn-Norm-Chg     Max-X-Chg Max-Jacob-Chg
+                    norm(x,2) Hybrid                                              Analytical
+--------------------------------------------------------------------------------------------
+     0        1     0.0246448    NaN           NaN           NaN             0           NaN
+     1        8   0.000216812    100             1     -0.024428     0.0174925      0.175798
+     2       15   1.63925e-08    100             1  -0.000216796   0.000151221    0.00153298
+     3       22             0      0             1  -1.63925e-08   1.14351e-08   1.15912e-07
+     4       29             0      0             1             0             0             0
+
+Successfully converged. Both step tolerance and function tolerance satisfied.
+
+</pre><h2 id="5">Calculate First-Order Solution Matrices</h2><p>Run <tt>solve( )</tt> to calculate a first-order expansion of the model equations around the steady state, and finds a first-order rational-expectations solution. The solution matrices (state-space matrices) are stored within the model object; they are examined in <a href="know_all_about_solution">know_all_about_solution</a>. The availability of a first-order solution is indicated the model object is displayed.</p><pre class="codeinput">m = solve(m);
+disp(m)
+</pre><pre class="codeoutput">	nonlinear model object: [1 parameter variant(s)]
+	number of equations: [4 16 4 0 0]
+	solution(s) available: [1 parameter variant(s)]
+	comment: 'Simple SPBC Model File'
+	user data: empty
+	export file(s): [0]
+
+</pre><h2 id="6">Save Model Object</h2><p>Save the solved model object to a mat file (internal Matlab binary file) for future use.</p><pre class="codeinput">save <span class="string">mat/read_model.mat</span> <span class="string">m</span>
+</pre><h2 id="7">Show Variables and Objects Created in This File</h2><pre class="codeinput">whos
+</pre><pre class="codeoutput">  Name      Size            Bytes  Class      Attributes
+
+  ans       1x1                 1  logical              
+  m         1x1             90932  model                
+
+</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2017b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% Create and Solve Model Object                                           
+%
+% Create a model object from the model file <Simple_SPBC.model.html
+% Simple_SPBC.model>, assign parameters to the model object, calculate its
+% steady state, and compute first-order solution matrices.
+%
+
+%% Clear Workspace                                                         
+%
+% Clear the workspace, and check the IRIS version.
+%
+
+clear
+close all
+clc
+irisrequired 20180131
+
+%% Read Model File and Create Model Object                                 
+%
+% The function |model| reads the model file <Simple_SPBC.model>, and
+% translates it into a model object, called here |m|. Model objects are
+% complex structures that carry all the necessary information about the
+% model, and can be manipulated by calling various IRIS functions.
+
+m = model('simple_SPBC.model');
+disp(m)
+
+
+%% Calibrate Model Parameters                                              
+%
+% Assign parameters using the dot syntax, e.g. |m.gamma = 0.60|| where
+% |gamma| is the name of a parameter, and |0.60| is the value to be
+% assigned. Use the function |get( )| to retrieve a databank with currently
+% assigned parameter values; the parameters that have been assigned no
+% value are |NaN|.
+
+m.alpha = 1.03^(1/4);
+m.beta = 0.985^(1/4);
+m.gamma = 0.60;
+m.delta = 0.03;
+m.pi = 1.025^(1/4);
+m.eta = 6;
+m.k = 10;
+m.psi = 0.25;
+
+m.chi = 0.85;
+m.xiw = 60;
+m.xip = 300;
+m.rhoa = 0.90;
+
+m.rhor = 0.85;
+m.kappap = 3.5;
+m.kappan = 0;
+
+m.Short_ = 0;
+m.Infl_ = 0;
+m.Growth_ = 0;
+m.Wage_ = 0;
+
+m.std_Mp = 0;
+m.std_Mw = 0;
+m.std_Ea = 0.001;
+
+disp('Parameter Databank from Model Object:');
+get(m, 'Parameters')
+
+
+%% Find Steady State 
+%
+% Run |sstate( )| to calculate the steady-state values for all model
+% variables. The option |Growth=true| means this is a non-stationary BGP
+% model where variables can grow at a constant rate over time; the
+% steady-state solution algorithm is modified to handle models with growth.
+% Use |chksstate( )| to numerically verify the steady state values
+% on dynamic equations; if there is a significant numerical discrepancy,
+% the function will throw an error.
+% 
+
+m = sstate(m, 'Growth=', true);
+chksstate(m);
+
+
+%% Calculate First-Order Solution Matrices                                 
+%
+% Run |solve( )| to calculate a first-order expansion of the model
+% equations around the steady state, and finds a first-order
+% rational-expectations solution. The solution matrices (state-space
+% matrices) are stored within the model object; they are examined in
+% <know_all_about_solution>. The availability of a first-order solution is
+% indicated the model object is displayed.
+%
+
+m = solve(m);
+disp(m)
+
+
+%% Save Model Object                                                       
+%
+% Save the solved model object to a mat file (internal Matlab binary file)
+% for future use.
+%
+
+save mat/read_model.mat m
+
+
+%% Show Variables and Objects Created in This File                         
+
+whos
+
+
+
+##### SOURCE END #####
+--></body></html>

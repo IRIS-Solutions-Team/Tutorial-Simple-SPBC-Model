@@ -1,5 +1,4 @@
 %% Simulate Fisher Info Matrix and Test Parameter Identification
-% by Jaromir Benes
 %
 % Calculate estimates of the Fisher information matrix. The Fisher matrix
 % is a property of the model itself, and is independent of any data. It
@@ -11,22 +10,30 @@
 % parameters (or combinations of them) are identified the best or the
 % worst.
 
+%% Dependencies                                                            
+%
+% Run the following m-files before this one:
+%
+% * <read_model.html |read_model|>
+%
+
 %% Clear Workspace
 %
 % Clear workspace, close all graphics figures, clear command window, and
 % check the IRIS version.
 
-clear;
-close all;
-clc;
-irisrequired 20140315;
+clear
+close all
+clc
+irisrequired 20180131
+
 
 %% Load Solved Model Object
 %
-% Load the solved model object built in `read_model`. Run `read_model` at
-% least once before running this m-file.
+% Load the solved model object built in |read_model|. 
 
-load MAT/read_model m;
+load mat/read_model m
+
 
 %% Calculate Fisher Information Matrix
 %
@@ -42,7 +49,7 @@ load MAT/read_model m;
 % The results are asymptotically equivalent. The actual differencies
 % observed in this exercise arise because of
 %
-% * sampling errors in the time domain,
+% * sampling errors in the time domain, 
 % * the fact that the frequency domain approach assumes that the model
 % variables follow a circular process (which is not true for samples of
 % finite lenthgs).
@@ -57,35 +64,35 @@ rng(0);
 plist = {'chi', 'xiw', 'xip', 'rhor', 'kappap', 'kappan', 'std_Ey'};
 
 % Set to a larger number in practice.
-nsim = 100;
+numDraws = 100;
 
-fprintf('Resample %g times from calibrated model.\n',nsim);
+fprintf('Resample %g times from calibrated model.\n', numDraws);
 
-% Simulate a total of nsim artificial data, length 40 periods.
-d = resample(m,[ ], 1:40,nsim, 'deviation=', false);
+% Simulate a total of numDraws artificial data, length 40 periods.
+d = resample(m, [ ], 1:40, numDraws, 'deviation=', false);
 d = rmfield(d, 'Wage');
 
-disp('Compute Hessians for each draw and average them.');
+disp('Compute Hessians for each draw and average them')
 
 [mloglik, s, F1] = diffloglik(m, d, 1:40, plist, ...
    'deviation=', true, 'relative=', false, 'progress=', true);
 
 F1 = mean(F1, 3);
 
-disp('Compute information matrix in frequency domain.');
+disp('Compute information matrix in frequency domain')
 [F2, F2i, d] = fisher(m, 40, plist, ...
     'deviation=', false, 'exclude=', {'Wage'}, 'progress=', true);
 
 format shortEng;
-disp('Compare time-domain and frequency domain info matrices.');
-disp('Time domain');
-F1 %#ok<NOPTS>
-disp('Frequency domain');
-F2 %#ok<NOPTS>
+disp('Compare time-domain and frequency domain info matrices')
+disp('Time domain')
+disp(F1)
+disp('Frequency domain')
+disp(F2)
 
-disp('Compare diagonal elements');
+disp('Compare diagonal elements')
 [diag(F1), diag(F2)] %#ok<NOPTS>
-format();
+format
 
 %% Singular Value Decomposition
 %
@@ -103,27 +110,23 @@ s2 = diag(s2);
 s1 = s1 / s1(1);
 s2 = s2 / s2(1);
 
-format('shortEng');
-disp('Singular values (normalised and ordered)');
-disp('Time domain');
+format shortEng
+disp('Singular values (normalised and ordered)')
+disp('Time domain')
 disp(s1.');
-disp('Frequency domain');
+disp('Frequency domain')
 disp(s2.');
 
-disp('Combinations of parameters ordered by degree of identification.');
-disp('Best identified columns ordered first');
+disp('Combinations of parameters ordered by degree of identification')
+disp('Best identified columns ordered first')
 
-disp('Time domain');
-[char(plist),num2str(u1, '| %-.2g')] %#ok<NOPTS>
-disp('Frequency domain');
-[char(plist),num2str(u2, '| %-.2g')] %#ok<NOPTS>
-format();
+disp('Time domain')
+[char(plist), num2str(u1, '| %-.2g')] %#ok<NOPTS>
+disp('Frequency domain')
+[char(plist), num2str(u2, '| %-.2g')] %#ok<NOPTS>
+format( );
 
-%% Help on IRIS Functions Used in This File
-%
-% Use either `help` to display help in the command window, or `idoc`
-% to display help in an HTML browser window.
-%
-%    help model/resample
-%    help model/fisher
-%    help model/diffloglik
+%% Variables and Objects Created in This File
+
+whos
+

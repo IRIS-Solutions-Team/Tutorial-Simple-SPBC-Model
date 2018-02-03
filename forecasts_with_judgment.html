@@ -1,0 +1,749 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>Forecasts with Judgmental Adjustments</title><meta name="generator" content="MATLAB 9.3"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2018-02-03"><meta name="DC.source" content="forecasts_with_judgment.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body { margin-left:5%; margin-right:35% }
+@media print {html body {margin-left:0px; margin-right:0px}}
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+/* tt { font-size: 1.2em; } */
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:1000%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>Forecasts with Judgmental Adjustments</h1><!--introduction--><p>Use the Kalman filtered data as the starting point for forecasts, both unconditional and conditional, i.e. with various types of judgmental adjustments.</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Dependencies</a></li><li><a href="#2">Clear Workspace</a></li><li><a href="#3">Load Estimated Model Object, Filtered Data, and Historical Database</a></li><li><a href="#4">Define Dates</a></li><li><a href="#5">Define Graphics Styles</a></li><li><a href="#6">Run Unconditional Forecast</a></li><li><a href="#7">Create Plot Lists</a></li><li><a href="#8">Report Unconditional Forecast</a></li><li><a href="#9">Exogenise Interest Rates</a></li><li><a href="#10">Compare Exogenised Forecasts with Unconditional Forecasts</a></li><li><a href="#11">Condition on Anticipated Interest Rates</a></li><li><a href="#12">Compare Anticipated Conditional Forecasts with Unconditional Forecasts</a></li><li><a href="#13">Condition on Unanticipated Interest Rates</a></li><li><a href="#14">Compare Unanticipated Conditional Forecasts with Uncondtional Forecasts</a></li><li><a href="#15">Exogenised Interest Rates and Condition on Inflation</a></li><li><a href="#16">Verify Exogenised and Conditioned Data Points</a></li><li><a href="#17">Compare Exogenised/Conditional Forecasts with Unconditional Forecasts</a></li><li><a href="#18">Resimulate Point Forecasts</a></li><li><a href="#19">Show Variables and Objects Created in This File</a></li></ul></div><h2 id="1">Dependencies</h2><p>Run the following m-files before this one:</p><div><ul><li><a href="read_data.html"><tt>read_data</tt></a></li><li><a href="estimate_params.html"><tt>estimate_params</tt></a></li><li><a href="filter_hist_data.html"><tt>filter_hist_data</tt></a></li></ul></div><h2 id="2">Clear Workspace</h2><p>Clear workspace, close all graphics figures, clear command window, and check the IRIS version.</p><pre class="codeinput">clear
+close <span class="string">all</span>
+clc
+irisrequired <span class="string">20180131</span>
+</pre><h2 id="3">Load Estimated Model Object, Filtered Data, and Historical Database</h2><p>Load the model object estimated in <tt>estimate_params</tt>, the filtered (smoothed) data from a Kalman filter in <tt>filter_hist_data</tt>, and the historical database created in <tt>read_data</tt>.</p><pre class="codeinput">load <span class="string">mat/estimate_params.mat</span> <span class="string">mest</span>
+load <span class="string">mat/filter_hist_data.mat</span> <span class="string">f</span>
+load <span class="string">mat/read_data.mat</span> <span class="string">d</span> <span class="string">startHist</span> <span class="string">endHist</span>
+</pre><h2 id="4">Define Dates</h2><pre class="codeinput">startFcst = endHist + 1;
+endFcst = startFcst + 3*4;
+startPlot = startFcst - 12;
+plotRng = startPlot:endFcst;
+highRng = startPlot:endHist;
+</pre><h2 id="5">Define Graphics Styles</h2><p>The structs <tt>sty1</tt> and <tt>sty2</tt> are used in the option <tt>Style=</tt> in <tt>dbplot( )</tt> to automatically style the graphs plotted.</p><pre class="codeinput">sty1 = struct( );
+sty1.Line.Color = @first;
+sty1.Line.LineStyle = {<span class="string">'-'</span>, <span class="string">'--'</span>, <span class="string">'--'</span>};
+sty1.Line.LineWidth = 1.5;
+sty1.Line.Marker = {<span class="string">'.'</span>, <span class="string">'none'</span>, <span class="string">'none'</span>};
+sty1.Axes.FontSize = 7;
+sty1.Legend.FontSize = 7;
+
+sty2 = sty1;
+sty2.Line.color = repmat( {@first, @second}, 1, 3);
+sty2.Line.LineStyle = {<span class="string">'-'</span>, <span class="string">'-'</span>, <span class="string">'--'</span>, <span class="string">'--'</span>, <span class="string">'--'</span>, <span class="string">'--'</span>};
+sty2.Line.LineWidth = 1.5;
+sty2.Line.Marker = {<span class="string">'.'</span>, <span class="string">'.'</span>, <span class="string">'none'</span>, <span class="string">'none'</span>, <span class="string">'none'</span>, <span class="string">'none'</span>};
+sty2.Axes.FontSize = 7;
+sty2.Legend.FontSize = 7;
+</pre><h2 id="6">Run Unconditional Forecast</h2><p>Unconditional forecast runs from the initial condition supplied in the input database, <tt>f</tt>. The initial conditions consist of the mean and the root mean square error (initial uncertainty) for each variable. Directly observed variables have obviously RMSE zero, the unobservables (such as productivity) have non-zero initial uncertainty.</p><pre class="codeinput">u = jforecast(mest, f, startFcst:endFcst);
+
+u <span class="comment">%#ok&lt;NOPTS&gt;</span>
+u.mean
+
+u.mean = dboverlay(f.mean, u.mean);
+u.std = dboverlay(f.std, u.std);
+</pre><pre class="codeoutput">
+u = 
+
+  struct with fields:
+
+    mean: [1x1 struct]
+     std: [1x1 struct]
+
+
+ans = 
+
+  struct with fields:
+
+          Short: [13x1 Series]
+           Infl: [13x1 Series]
+         Growth: [13x1 Series]
+           Wage: [13x1 Series]
+              Y: [15x1 Series]
+              N: [13x1 Series]
+              W: [15x1 Series]
+              Q: [13x1 Series]
+              H: [13x1 Series]
+              A: [14x1 Series]
+             dA: [14x1 Series]
+              P: [17x1 Series]
+              R: [14x1 Series]
+             Pk: [13x1 Series]
+             Rk: [13x1 Series]
+         Lambda: [13x1 Series]
+             dP: [14x1 Series]
+            d4P: [13x1 Series]
+             dW: [14x1 Series]
+            RMC: [13x1 Series]
+             Mp: [13x1 Series]
+             Mw: [13x1 Series]
+             Ey: [13x1 Series]
+             Ep: [13x1 Series]
+             Ea: [13x1 Series]
+             Er: [13x1 Series]
+             Ew: [13x1 Series]
+          alpha: 1.0074
+           beta: 0.9962
+          gamma: 0.6000
+          delta: 0.0300
+              k: 10
+             pi: 1.0062
+            eta: 6
+            psi: 0.2500
+            chi: 0.9138
+            xiw: 133.8286
+            xip: 264.6679
+           rhoa: 0.9000
+           rhor: 0.8587
+         kappap: 2.9457
+         kappan: 0.3419
+         Short_: -3.9012
+          Infl_: -0.3539
+        Growth_: 0.0078
+          Wage_: -1.9244
+         ttrend: [13x1 Series]
+         std_Mp: 0
+         std_Mw: 0
+         std_Ey: 0.0079
+         std_Ep: 0.0032
+         std_Ea: 0.0011
+         std_Er: 9.2918e-04
+         std_Ew: 0.0019
+    corr_Ep__Er: -0.1107
+
+</pre><h2 id="7">Create Plot Lists</h2><p>Define variables and titles to appear in graphs created by <tt>dbplot( )</tt> functions after each forecast experiment.</p><pre class="codeinput">plotList1 = { <span class="keyword">...</span>
+    <span class="string">' "Short Rate, PA" [mean.Short, mean.Short+std.Short, mean.Short-std.Short]'</span>, <span class="keyword">...</span>
+    <span class="string">' "Inflation, Q/Q PA" [mean.Infl, mean.Infl+std.Infl, mean.Infl-std.Infl]'</span>, <span class="keyword">...</span>
+    <span class="string">' "Output Growth, Q/Q PA" [mean.Growth, mean.Growth+std.Growth, mean.Growth-std.Growth]'</span>, <span class="keyword">...</span>
+    <span class="string">' "Wage Inflation, Q/Q PA" [mean.Wage, mean.Wage+std.Wage, mean.Wage-std.Wage]'</span>, <span class="keyword">...</span>
+    };
+
+plotList2 = { <span class="keyword">...</span>
+	<span class="string">' "Consumption Demand Shocks" mean.Ey'</span>, <span class="keyword">...</span>
+    <span class="string">' "Cost Push Shocks" mean.Ep'</span>, <span class="keyword">...</span>
+    <span class="string">' "Productivity Shocks" mean.Ea'</span>, <span class="keyword">...</span>
+    <span class="string">' "Policy Shocks" mean.Er'</span>, <span class="keyword">...</span>
+    <span class="string">' "Wage Shocks" mean.Ew'</span>, <span class="keyword">...</span>
+    };
+</pre><h2 id="8">Report Unconditional Forecast</h2><pre class="codeinput">dbplot(u, startPlot:endFcst, plotList1, <span class="keyword">...</span>
+    <span class="string">'Tight='</span>, true, <span class="string">'Style='</span>, sty1, <span class="string">'Highlight='</span>, highRng);
+grfun.ftitle(<span class="string">'Unconditional Forecasts'</span>);
+grfun.bottomlegend(<span class="string">'Mean'</span>, <span class="string">'Mean +/- 1 Std'</span>);
+
+dbplot(u, startPlot:endFcst, plotList2, <span class="keyword">...</span>
+    <span class="string">'Tight='</span>, true, <span class="string">'Style='</span>, sty1, <span class="string">'Highlight='</span>, highRng, <span class="keyword">...</span>
+    <span class="string">'Transform='</span>, @(x) 100*x);
+grfun.ftitle(<span class="string">'Unconditional Forecasts'</span>);
+</pre><img vspace="5" hspace="5" src="html-source/forecasts_with_judgment_01.png" alt=""> <img vspace="5" hspace="5" src="html-source/forecasts_with_judgment_02.png" alt=""> <h2 id="9">Exogenise Interest Rates</h2><p>In this judgmentally adjusted forecast, swap the endogeneity and exogeneity of the short rates and the policy shocks. In other words, the short rates are kept fixed at a specified level (here, it is the last observed value), and the policy shocks become a new "endogenous variable" that adjust exactly so to make the policy rule consistent with the fixed interest rates.</p><p>The forecast with exogenised interest rates is run in an anticipated mode.</p><pre class="codeinput">sc1 = plan(mest, startFcst:endFcst);
+sc1 = exogenize(sc1, <span class="string">'Short'</span>, startFcst:startFcst+3);
+sc1 = endogenize(sc1, <span class="string">'Er'</span>, startFcst:startFcst+3);
+
+f1 = f;
+f1.mean.Short(startFcst:startFcst+3, 1) = f.mean.Short(endHist);
+
+detail(sc1, f1);
+
+j1 = jforecast(mest, f1, startFcst:endFcst, <span class="string">'Plan='</span>, sc1);
+</pre><pre class="codeoutput">
+	Exogenized: [4]
+		Short  *2011Q1[=0.136667] *2011Q2[=0.136667] *2011Q3[=0.136667] *2011Q4[=0.136667]
+	Endogenized real: [4]
+		Er     *2011Q1[@1] *2011Q2[@1] *2011Q3[@1] *2011Q4[@1]
+	Endogenized imag: [0]
+	-
+	Conditioned upon: [0]
+	-
+
+</pre><h2 id="10">Compare Exogenised Forecasts with Unconditional Forecasts</h2><pre class="codeinput">dbplot(u &amp; j1, startPlot:endFcst, plotList1, <span class="keyword">...</span>
+    <span class="string">'Tight='</span>, true, <span class="string">'Style='</span>, sty2, <span class="string">'Highlight='</span>, highRng);
+grfun.ftitle(<span class="string">'Unconditional vs Exogenized Short Rate'</span>);
+grfun.bottomlegend(<span class="string">'Uncond Mean'</span>, <span class="string">'Exogen Mean'</span>, <span class="keyword">...</span>
+    <span class="string">'Uncond Mean +/- 1 Std'</span>, <span class="string">'Exogen Mean +/- 1 Std'</span>);
+
+dbplot(u &amp; j1, startPlot:endFcst, plotList2, <span class="keyword">...</span>
+    <span class="string">'Tight='</span>, true, <span class="string">'Style='</span>, sty2, <span class="string">'Highlight='</span>, highRng, <span class="keyword">...</span>
+    <span class="string">'Transform='</span>, @(x) 100*x);
+grfun.ftitle(<span class="string">'Unconditional vs Exogenized Short Rate'</span>);
+</pre><img vspace="5" hspace="5" src="html-source/forecasts_with_judgment_03.png" alt=""> <img vspace="5" hspace="5" src="html-source/forecasts_with_judgment_04.png" alt=""> <h2 id="11">Condition on Anticipated Interest Rates</h2><p>In this exercise, keep the interest rates fixed, but use a very different mechanism to do that. Compute the most likely combination of all possible shocks, except the monetary policy shocks, and changes in the initial conditions to reproduce a given path for the interest rates (it is again a flat track). The forecast is produced in an anticipated mode, which means that all agents know the future shocks from the very beginning.</p><pre class="codeinput">mest1 = mest;
+mest1.std_Er = 0;
+
+get(mest, <span class="string">'Std'</span>) &amp; get(mest1, <span class="string">'Std'</span>) <span class="comment">%#ok&lt;NOPTS&gt;</span>
+
+sc2 = plan(mest1, startFcst:endFcst);
+sc2 = condition(sc2, <span class="string">'Short'</span>, startFcst:startFcst+3);
+
+f2 = f;
+f2.mean.Short(startFcst:startFcst+3) = f2.mean.Short(endHist);
+
+c = struct( );
+c.Short = f2.mean.Short;
+
+detail(sc2, f2);
+
+j2 = jforecast(mest1, f2, startFcst:endFcst, c, <span class="string">'Plan='</span>, sc2);
+</pre><pre class="codeoutput">
+ans = 
+
+  struct with fields:
+
+    std_Mp: [0 0]
+    std_Mw: [0 0]
+    std_Ey: [0.0079 0.0079]
+    std_Ep: [0.0032 0.0032]
+    std_Ea: [0.0011 0.0011]
+    std_Er: [9.2918e-04 0]
+    std_Ew: [0.0019 0.0019]
+
+
+	Exogenized: [0]
+	-
+	Endogenized real: [0]
+	-
+	Endogenized imag: [0]
+	-
+	Conditioned upon: [4]
+		Short  *2011Q1[=0.136667] *2011Q2[=0.136667] *2011Q3[=0.136667] *2011Q4[=0.136667]
+
+</pre><h2 id="12">Compare Anticipated Conditional Forecasts with Unconditional Forecasts</h2><pre class="codeinput">dbplot(u &amp; j2, startPlot:endFcst, plotList1, <span class="keyword">...</span>
+    <span class="string">'Tight='</span>, true, <span class="string">'Style='</span>, sty2, <span class="string">'Highlight='</span>, highRng);
+grfun.ftitle(<span class="string">'Unconditional vs Conditional on Anticipated Short Rate'</span>);
+grfun.bottomlegend(<span class="string">'Uncond Mean'</span>, <span class="string">'Cond Mean'</span>, <span class="keyword">...</span>
+    <span class="string">'Uncond Mean +/- 1 Std'</span>, <span class="string">'Cond Mean +/ 1 Std'</span>);
+
+dbplot(u &amp; j2, startPlot:endFcst, plotList2, <span class="keyword">...</span>
+    <span class="string">'Tight='</span>, true, <span class="string">'Style='</span>, sty2, <span class="string">'Highlight='</span>, highRng, <span class="keyword">...</span>
+    <span class="string">'Transform='</span>, @(x) 100*x);
+grfun.ftitle(<span class="string">'Unconditional vs Conditional on Anticipated Short Rate'</span>);
+</pre><img vspace="5" hspace="5" src="html-source/forecasts_with_judgment_05.png" alt=""> <img vspace="5" hspace="5" src="html-source/forecasts_with_judgment_06.png" alt=""> <h2 id="13">Condition on Unanticipated Interest Rates</h2><p>Do the same as above, but with the conditioning interest rate unanticipated.</p><pre class="codeinput">sc3 = sc2;
+f3 = f2;
+
+j3 = jforecast(mest1, f3, startFcst:endFcst+50, <span class="keyword">...</span>
+    <span class="string">'Plan='</span>, sc3, <span class="string">'anticipate='</span>, false);
+</pre><h2 id="14">Compare Unanticipated Conditional Forecasts with Uncondtional Forecasts</h2><pre class="codeinput">dbplot(u &amp; j3, startPlot:endFcst, plotList1, <span class="keyword">...</span>
+    <span class="string">'Tight='</span>, true, <span class="string">'Style='</span>, sty2, <span class="string">'Highlight='</span>, highRng);
+grfun.ftitle(<span class="string">'Unconditional vs Conditional on Unanticipated Short Rate'</span>);
+grfun.bottomlegend(<span class="string">'Uncond Mean'</span>, <span class="string">'Cond Mean'</span>, <span class="keyword">...</span>
+    <span class="string">'Uncond Mean +/- 1 Std'</span>, <span class="string">'Cond Mean +/ 1 Std'</span>);
+
+dbplot(u &amp; j3, startPlot:endFcst, plotList2, <span class="keyword">...</span>
+    <span class="string">'Tight='</span>, true, <span class="string">'Style='</span>, sty2, <span class="string">'Highlight='</span>, highRng, <span class="keyword">...</span>
+    <span class="string">'Transform='</span>, @(x) 100*x);
+grfun.ftitle(<span class="string">'Unconditional vs Conditional on Unanticipated Short Rate'</span>);
+</pre><img vspace="5" hspace="5" src="html-source/forecasts_with_judgment_07.png" alt=""> <img vspace="5" hspace="5" src="html-source/forecasts_with_judgment_08.png" alt=""> <h2 id="15">Exogenised Interest Rates and Condition on Inflation</h2><p>Combine two techniques together: exogenizing and conditioning.</p><pre class="codeinput">sc4 = plan(mest, startFcst:endFcst);
+
+sc4 = exogenise(sc4, <span class="string">'Short'</span>, startFcst:startFcst+3);
+sc4 = endogenise(sc4, <span class="string">'Er'</span>, startFcst:startFcst+3);
+
+sc4 = condition(sc4, <span class="string">'Infl'</span>, startFcst:startFcst+3);
+
+f4 = f;
+f4.mean.Short(startFcst:startFcst+3) = f4.mean.Short(endHist);
+f4.mean.Infl(startFcst:startFcst+3) = f4.mean.Infl(endHist);
+
+j4 = jforecast(mest1, f4, startFcst:endFcst+50, <span class="string">'Plan='</span>, sc4);
+</pre><h2 id="16">Verify Exogenised and Conditioned Data Points</h2><p>Print the forecasts for the interest rate and inflation, and compare the forecasts with the values we supplied in the input database.</p><pre class="codeinput">disp(<span class="string">'Interest rate forecast and tunes'</span>);
+[j4.mean.Short{startFcst:startFcst+3}, <span class="keyword">...</span>
+    f4.mean.Short{startFcst:startFcst+3}] <span class="comment">%#ok&lt;NOPTS&gt;</span>
+
+disp(<span class="string">'Inflation forecast and conditions'</span>);
+[j4.mean.Infl{startFcst:startFcst+3}, <span class="keyword">...</span>
+    f4.mean.Infl{startFcst:startFcst+3}] <span class="comment">%#ok&lt;NOPTS&gt;</span>
+</pre><pre class="codeoutput">Interest rate forecast and tunes
+
+ans = 
+
+	Series object: 4-by-2
+
+	2011Q1:  0.13667     0.13667
+	2011Q2:  0.13667     0.13667
+	2011Q3:  0.13667     0.13667
+	2011Q4:  0.13667     0.13667
+
+    'Short Term Rate'    'Short Term Rate'
+
+	user data: empty
+
+Inflation forecast and conditions
+
+ans = 
+
+	Series object: 4-by-2
+
+	2011Q1:  0.33538     0.33538
+	2011Q2:  0.33538     0.33538
+	2011Q3:  0.33538     0.33538
+	2011Q4:  0.33538     0.33538
+
+    'Price Inflation'    'Price Inflation'
+
+	user data: empty
+
+</pre><h2 id="17">Compare Exogenised/Conditional Forecasts with Unconditional Forecasts</h2><pre class="codeinput">dbplot(u &amp; j4, startPlot:endFcst, plotList1, <span class="keyword">...</span>
+    <span class="string">'Tight='</span>, true, <span class="string">'Style='</span>, sty2, <span class="string">'Highlight='</span>, highRng);
+grfun.ftitle([<span class="string">'Unconditional vs '</span>, <span class="keyword">...</span>
+    <span class="string">'Anticipated Exogenised Short Rate and Conditional on Inflation'</span>]);
+grfun.bottomlegend(<span class="string">'Uncond Mean'</span>, <span class="string">'Cond Mean'</span>, <span class="keyword">...</span>
+    <span class="string">'Uncond Mean +/- 1 Std'</span>, <span class="string">'Cond Mean +/ 1 Std'</span>);
+
+dbplot(u &amp; j4, startPlot:endFcst, plotList2, <span class="keyword">...</span>
+    <span class="string">'Tight='</span>, true, <span class="string">'Style='</span>, sty2, <span class="string">'Highlight='</span>, highRng, <span class="keyword">...</span>
+    <span class="string">'Transform='</span>, @(x) 100*x);
+grfun.ftitle([<span class="string">'Unconditional vs '</span>, <span class="keyword">...</span>
+    <span class="string">'Anticipated Exogenised Short Rate and Conditional on Inflation'</span>]);
+</pre><img vspace="5" hspace="5" src="html-source/forecasts_with_judgment_09.png" alt=""> <img vspace="5" hspace="5" src="html-source/forecasts_with_judgment_10.png" alt=""> <h2 id="18">Resimulate Point Forecasts</h2><p>The function <tt>simulate( )</tt> only uses the input database for initial condition and in-sample shocks. The shocks backed out by <tt>jforecast( )</tt> are such that they exactly reproduce the exogenised and/or conditioned data points.  The function <tt>maxabs( )</tt> reports the max abs differences between the fields of the same name in two structs (databases).</p><pre class="codeinput">s1 = simulate(mest1, j1.mean, startFcst:endFcst);
+s2 = simulate(mest1, j2.mean, startFcst:endFcst);
+s3 = simulate(mest1, j3.mean, startFcst:endFcst, <span class="string">'anticipate='</span>, false);
+s4 = simulate(mest1, j4.mean, startFcst:endFcst);
+
+maxabs(s1, j1.mean) <span class="keyword">...</span>
+    &amp; maxabs(s2, j2.mean) <span class="keyword">...</span>
+    &amp; maxabs(s3, j3.mean) <span class="keyword">...</span>
+    &amp; maxabs(s4, j4.mean) <span class="comment">%#ok&lt;NOPTS&gt;</span>
+</pre><pre class="codeoutput">
+ans = 
+
+  struct with fields:
+
+          Short: [3.4639e-14 3.3751e-14 4.2633e-14 6.1284e-14]
+           Infl: [2.2204e-14 2.3093e-14 4.6241e-14 6.2172e-14]
+         Growth: [7.9936e-15 3.0198e-14 2.7534e-14 3.0198e-14]
+           Wage: [4.3521e-14 5.9952e-14 1.0214e-13 9.5923e-14]
+              Y: [1.3323e-15 2.2204e-15 6.6613e-16 6.6613e-16]
+              N: [2.2204e-16 1.1102e-16 2.2204e-16 2.2204e-16]
+              W: [1.7764e-15 4.4409e-15 5.3291e-15 5.3291e-15]
+              Q: [8.8818e-16 6.6613e-16 1.5543e-15 1.1102e-15]
+              H: [1.7764e-15 1.9984e-15 8.8818e-16 8.8818e-16]
+              A: [8.8818e-16 1.5543e-15 4.4409e-16 6.6613e-16]
+             dA: [0 2.2204e-16 2.2204e-16 2.2204e-16]
+              P: [1.1102e-15 4.4409e-16 1.1102e-15 1.1102e-15]
+              R: [2.2204e-16 0 2.2204e-16 2.2204e-16]
+             Pk: [2.2204e-15 3.5527e-15 3.1086e-15 2.6645e-15]
+             Rk: [4.1633e-17 1.1102e-16 8.3267e-17 1.1102e-16]
+         Lambda: [3.3307e-16 6.1062e-16 5.5511e-16 3.8858e-16]
+             dP: [0 2.2204e-16 2.2204e-16 2.2204e-16]
+            d4P: [2.2204e-16 2.2204e-16 4.4409e-16 4.4409e-16]
+             dW: [2.2204e-16 2.2204e-16 2.2204e-16 2.2204e-16]
+            RMC: [2.2204e-16 3.3307e-16 4.4409e-16 4.4409e-16]
+             Mp: [0 0 0 0]
+             Mw: [0 0 0 0]
+             Ey: [0 0 0 0]
+             Ep: [0 0 0 0]
+             Ea: [0 0 0 0]
+             Er: [0 0 0 0]
+             Ew: [0 0 0 0]
+          alpha: [0 0 0 0]
+           beta: [0 0 0 0]
+          gamma: [0 0 0 0]
+          delta: [0 0 0 0]
+              k: [0 0 0 0]
+             pi: [0 0 0 0]
+            eta: [0 0 0 0]
+            psi: [0 0 0 0]
+            chi: [0 0 0 0]
+            xiw: [0 0 0 0]
+            xip: [0 0 0 0]
+           rhoa: [0 0 0 0]
+           rhor: [0 0 0 0]
+         kappap: [0 0 0 0]
+         kappan: [0 0 0 0]
+         Short_: [0 0 0 0]
+          Infl_: [0 0 0 0]
+        Growth_: [0 0 0 0]
+          Wage_: [0 0 0 0]
+         ttrend: [0 0 0 0]
+         std_Mp: [0 0 0 0]
+         std_Mw: [0 0 0 0]
+         std_Ey: [0 0 0 0]
+         std_Ep: [0 0 0 0]
+         std_Ea: [0 0 0 0]
+         std_Er: [9.2918e-04 0 0 0]
+         std_Ew: [0 0 0 0]
+    corr_Ep__Er: [0 0 0 0]
+
+</pre><h2 id="19">Show Variables and Objects Created in This File</h2><pre class="codeinput">whos
+</pre><pre class="codeoutput">  Name           Size             Bytes  Class          Attributes
+
+  ans            1x1              11440  struct                   
+  c              1x1                966  struct                   
+  d              1x1              15480  struct                   
+  endFcst        1x1                  8  DateWrapper              
+  endHist        1x1                  8  DateWrapper              
+  f              1x1             179944  struct                   
+  f1             1x1             179944  struct                   
+  f2             1x1             179944  struct                   
+  f3             1x1             179944  struct                   
+  f4             1x1             179944  struct                   
+  highRng        1x12                96  DateWrapper              
+  j1             1x1              37936  struct                   
+  j2             1x1              37936  struct                   
+  j3             1x1              60336  struct                   
+  j4             1x1              60336  struct                   
+  mest           1x1              90932  model                    
+  mest1          1x1              90932  model                    
+  plotList1      1x4               1066  cell                     
+  plotList2      1x5                838  cell                     
+  plotRng        1x25               200  DateWrapper              
+  s1             1x1              18792  struct                   
+  s2             1x1              18792  struct                   
+  s3             1x1              18792  struct                   
+  s4             1x1              18792  struct                   
+  sc1            1x1               7870  plan                     
+  sc2            1x1               7870  plan                     
+  sc3            1x1               7870  plan                     
+  sc4            1x1               7870  plan                     
+  startFcst      1x1                  8  DateWrapper              
+  startHist      1x1                  8  DateWrapper              
+  startPlot      1x1                  8  DateWrapper              
+  sty1           1x1               2340  struct                   
+  sty2           1x1               4080  struct                   
+  u              1x1              62632  struct                   
+
+</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2017b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% Forecasts with Judgmental Adjustments
+%
+% Use the Kalman filtered data as the starting point for forecasts, both
+% unconditional and conditional, i.e. with various types of judgmental
+% adjustments.
+
+%% Dependencies                                                            
+%
+% Run the following m-files before this one:
+%
+% * <read_data.html |read_data|>
+% * <estimate_params.html |estimate_params|>
+% * <filter_hist_data.html |filter_hist_data|>
+%
+
+
+%% Clear Workspace
+%
+% Clear workspace, close all graphics figures, clear command window, and
+% check the IRIS version.
+
+clear
+close all
+clc
+irisrequired 20180131
+
+
+%% Load Estimated Model Object, Filtered Data, and Historical Database
+%
+% Load the model object estimated in |estimate_params|, the filtered
+% (smoothed) data from a Kalman filter in |filter_hist_data|, and the
+% historical database created in |read_data|. 
+
+load mat/estimate_params.mat mest
+load mat/filter_hist_data.mat f
+load mat/read_data.mat d startHist endHist
+
+
+%% Define Dates
+
+startFcst = endHist + 1;
+endFcst = startFcst + 3*4;
+startPlot = startFcst - 12;
+plotRng = startPlot:endFcst;
+highRng = startPlot:endHist;
+
+%% Define Graphics Styles
+%
+% The structs |sty1| and |sty2| are used in the option |Style=| in
+% |dbplot( )| to automatically style the graphs plotted.
+
+sty1 = struct( );
+sty1.Line.Color = @first;
+sty1.Line.LineStyle = {'-', 'REPLACE_WITH_DASH_DASH', 'REPLACE_WITH_DASH_DASH'};
+sty1.Line.LineWidth = 1.5;
+sty1.Line.Marker = {'.', 'none', 'none'};
+sty1.Axes.FontSize = 7;
+sty1.Legend.FontSize = 7;
+
+sty2 = sty1;
+sty2.Line.color = repmat( {@first, @second}, 1, 3);
+sty2.Line.LineStyle = {'-', '-', 'REPLACE_WITH_DASH_DASH', 'REPLACE_WITH_DASH_DASH', 'REPLACE_WITH_DASH_DASH', 'REPLACE_WITH_DASH_DASH'};
+sty2.Line.LineWidth = 1.5;
+sty2.Line.Marker = {'.', '.', 'none', 'none', 'none', 'none'};
+sty2.Axes.FontSize = 7;
+sty2.Legend.FontSize = 7;
+
+%% Run Unconditional Forecast
+%
+% Unconditional forecast runs from the initial condition supplied in the
+% input database, |f|. The initial conditions consist of the mean and the
+% root mean square error (initial uncertainty) for each variable. Directly
+% observed variables have obviously RMSE zero, the unobservables (such as
+% productivity) have non-zero initial uncertainty.
+
+u = jforecast(mest, f, startFcst:endFcst);
+
+u %#ok<NOPTS>
+u.mean
+
+u.mean = dboverlay(f.mean, u.mean);
+u.std = dboverlay(f.std, u.std);
+
+%% Create Plot Lists
+%
+% Define variables and titles to appear in graphs created by |dbplot( )|
+% functions after each forecast experiment.
+
+plotList1 = { ...
+    ' "Short Rate, PA" [mean.Short, mean.Short+std.Short, mean.Short-std.Short]', ...
+    ' "Inflation, Q/Q PA" [mean.Infl, mean.Infl+std.Infl, mean.Infl-std.Infl]', ...
+    ' "Output Growth, Q/Q PA" [mean.Growth, mean.Growth+std.Growth, mean.Growth-std.Growth]', ...
+    ' "Wage Inflation, Q/Q PA" [mean.Wage, mean.Wage+std.Wage, mean.Wage-std.Wage]', ...
+    };
+
+plotList2 = { ...
+	' "Consumption Demand Shocks" mean.Ey', ...
+    ' "Cost Push Shocks" mean.Ep', ...
+    ' "Productivity Shocks" mean.Ea', ...
+    ' "Policy Shocks" mean.Er', ...
+    ' "Wage Shocks" mean.Ew', ...
+    };
+
+%% Report Unconditional Forecast
+
+dbplot(u, startPlot:endFcst, plotList1, ...
+    'Tight=', true, 'Style=', sty1, 'Highlight=', highRng);
+grfun.ftitle('Unconditional Forecasts');
+grfun.bottomlegend('Mean', 'Mean +/- 1 Std');
+
+dbplot(u, startPlot:endFcst, plotList2, ...
+    'Tight=', true, 'Style=', sty1, 'Highlight=', highRng, ...
+    'Transform=', @(x) 100*x);
+grfun.ftitle('Unconditional Forecasts');
+
+%% Exogenise Interest Rates
+%
+% In this judgmentally adjusted forecast, swap the endogeneity and
+% exogeneity of the short rates and the policy shocks. In other words, the
+% short rates are kept fixed at a specified level (here, it is the last
+% observed value), and the policy shocks become a new "endogenous variable"
+% that adjust exactly so to make the policy rule consistent with the fixed
+% interest rates.
+%
+% The forecast with exogenised interest rates is run in an anticipated
+% mode.
+
+sc1 = plan(mest, startFcst:endFcst);
+sc1 = exogenize(sc1, 'Short', startFcst:startFcst+3);
+sc1 = endogenize(sc1, 'Er', startFcst:startFcst+3);
+
+f1 = f;
+f1.mean.Short(startFcst:startFcst+3, 1) = f.mean.Short(endHist);
+
+detail(sc1, f1);
+
+j1 = jforecast(mest, f1, startFcst:endFcst, 'Plan=', sc1);
+
+%% Compare Exogenised Forecasts with Unconditional Forecasts
+
+dbplot(u & j1, startPlot:endFcst, plotList1, ...
+    'Tight=', true, 'Style=', sty2, 'Highlight=', highRng);
+grfun.ftitle('Unconditional vs Exogenized Short Rate');
+grfun.bottomlegend('Uncond Mean', 'Exogen Mean', ...
+    'Uncond Mean +/- 1 Std', 'Exogen Mean +/- 1 Std');
+
+dbplot(u & j1, startPlot:endFcst, plotList2, ...
+    'Tight=', true, 'Style=', sty2, 'Highlight=', highRng, ...
+    'Transform=', @(x) 100*x);
+grfun.ftitle('Unconditional vs Exogenized Short Rate');
+
+%% Condition on Anticipated Interest Rates
+%
+% In this exercise, keep the interest rates fixed, but use a very different
+% mechanism to do that. Compute the most likely combination of all possible
+% shocks, except the monetary policy shocks, and changes in the initial
+% conditions to reproduce a given path for the interest rates (it is again
+% a flat track). The forecast is produced in an anticipated mode, which
+% means that all agents know the future shocks from the very beginning.
+
+mest1 = mest;
+mest1.std_Er = 0;
+
+get(mest, 'Std') & get(mest1, 'Std') %#ok<NOPTS>
+
+sc2 = plan(mest1, startFcst:endFcst);
+sc2 = condition(sc2, 'Short', startFcst:startFcst+3);
+
+f2 = f;
+f2.mean.Short(startFcst:startFcst+3) = f2.mean.Short(endHist);
+
+c = struct( );
+c.Short = f2.mean.Short;
+
+detail(sc2, f2);
+
+j2 = jforecast(mest1, f2, startFcst:endFcst, c, 'Plan=', sc2);
+
+%% Compare Anticipated Conditional Forecasts with Unconditional Forecasts
+
+dbplot(u & j2, startPlot:endFcst, plotList1, ...
+    'Tight=', true, 'Style=', sty2, 'Highlight=', highRng);
+grfun.ftitle('Unconditional vs Conditional on Anticipated Short Rate');
+grfun.bottomlegend('Uncond Mean', 'Cond Mean', ...
+    'Uncond Mean +/- 1 Std', 'Cond Mean +/ 1 Std');
+
+dbplot(u & j2, startPlot:endFcst, plotList2, ...
+    'Tight=', true, 'Style=', sty2, 'Highlight=', highRng, ...
+    'Transform=', @(x) 100*x);
+grfun.ftitle('Unconditional vs Conditional on Anticipated Short Rate');
+
+%% Condition on Unanticipated Interest Rates
+%
+% Do the same as above, but with the conditioning interest rate
+% unanticipated.
+
+sc3 = sc2;
+f3 = f2;
+
+j3 = jforecast(mest1, f3, startFcst:endFcst+50, ...
+    'Plan=', sc3, 'anticipate=', false);
+
+%% Compare Unanticipated Conditional Forecasts with Uncondtional Forecasts
+
+dbplot(u & j3, startPlot:endFcst, plotList1, ...
+    'Tight=', true, 'Style=', sty2, 'Highlight=', highRng);
+grfun.ftitle('Unconditional vs Conditional on Unanticipated Short Rate');
+grfun.bottomlegend('Uncond Mean', 'Cond Mean', ...
+    'Uncond Mean +/- 1 Std', 'Cond Mean +/ 1 Std');
+
+dbplot(u & j3, startPlot:endFcst, plotList2, ...
+    'Tight=', true, 'Style=', sty2, 'Highlight=', highRng, ...
+    'Transform=', @(x) 100*x);
+grfun.ftitle('Unconditional vs Conditional on Unanticipated Short Rate');
+
+
+%% Exogenised Interest Rates and Condition on Inflation
+%
+% Combine two techniques together: exogenizing and conditioning.
+
+sc4 = plan(mest, startFcst:endFcst);
+
+sc4 = exogenise(sc4, 'Short', startFcst:startFcst+3);
+sc4 = endogenise(sc4, 'Er', startFcst:startFcst+3);
+
+sc4 = condition(sc4, 'Infl', startFcst:startFcst+3);
+
+f4 = f;
+f4.mean.Short(startFcst:startFcst+3) = f4.mean.Short(endHist);
+f4.mean.Infl(startFcst:startFcst+3) = f4.mean.Infl(endHist);
+
+j4 = jforecast(mest1, f4, startFcst:endFcst+50, 'Plan=', sc4);
+
+%% Verify Exogenised and Conditioned Data Points
+%
+% Print the forecasts for the interest rate and inflation, and compare the
+% forecasts with the values we supplied in the input database.
+
+disp('Interest rate forecast and tunes');
+[j4.mean.Short{startFcst:startFcst+3}, ...
+    f4.mean.Short{startFcst:startFcst+3}] %#ok<NOPTS>
+
+disp('Inflation forecast and conditions');
+[j4.mean.Infl{startFcst:startFcst+3}, ...
+    f4.mean.Infl{startFcst:startFcst+3}] %#ok<NOPTS>
+
+%% Compare Exogenised/Conditional Forecasts with Unconditional Forecasts
+
+dbplot(u & j4, startPlot:endFcst, plotList1, ...
+    'Tight=', true, 'Style=', sty2, 'Highlight=', highRng);
+grfun.ftitle(['Unconditional vs ', ...
+    'Anticipated Exogenised Short Rate and Conditional on Inflation']);
+grfun.bottomlegend('Uncond Mean', 'Cond Mean', ...
+    'Uncond Mean +/- 1 Std', 'Cond Mean +/ 1 Std');
+
+dbplot(u & j4, startPlot:endFcst, plotList2, ...
+    'Tight=', true, 'Style=', sty2, 'Highlight=', highRng, ...
+    'Transform=', @(x) 100*x);
+grfun.ftitle(['Unconditional vs ', ...
+    'Anticipated Exogenised Short Rate and Conditional on Inflation']);
+
+%% Resimulate Point Forecasts
+%
+% The function |simulate( )| only uses the input database for initial
+% condition and in-sample shocks. The shocks backed out by |jforecast( )|
+% are such that they exactly reproduce the exogenised and/or conditioned
+% data points.  The function |maxabs( )| reports the max abs differences
+% between the fields of the same name in two structs (databases).
+
+s1 = simulate(mest1, j1.mean, startFcst:endFcst); 
+s2 = simulate(mest1, j2.mean, startFcst:endFcst);
+s3 = simulate(mest1, j3.mean, startFcst:endFcst, 'anticipate=', false);
+s4 = simulate(mest1, j4.mean, startFcst:endFcst);
+
+maxabs(s1, j1.mean) ... 
+    & maxabs(s2, j2.mean) ...
+    & maxabs(s3, j3.mean) ...
+    & maxabs(s4, j4.mean) %#ok<NOPTS>
+
+
+%% Show Variables and Objects Created in This File                         
+
+whos
+
+
+##### SOURCE END #####
+--></body></html>

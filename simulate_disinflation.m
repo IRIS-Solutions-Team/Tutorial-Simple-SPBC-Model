@@ -1,5 +1,4 @@
 %% Simulate Permanent Change in Inflation Target
-% by Jaromir Benes
 %
 % Simulate a permanent change in the inflation target, calculate the
 % sacrifice ratio, and run a simple parameter sensitivity exercise using
@@ -10,21 +9,21 @@
 % Clear workspace, close all graphics figures, clear command window, and
 % check the IRIS version.
 
-clear;
-close all;
-clc;
-irisrequired 20140315;
+clear
+close all
+clc
+irisrequired 20180131
 %#ok<*NASGU>
 %#ok<*NOPTS>
  
 %% Load Solved Model Object
 %
-% Load the solved model object built in `read_model`; run `read_model` at
-% least once before running this m-file.
+% Load the solved model object built in <read_model.html read_model>. Run
+% |read_model| at least once before running this m-file.
 
-load MAT/read_model.mat m;
+load mat/read_model.mat m
 
-%% Define dates
+%% Define Dates
 
 startDate = qq(2009, 2);
 endDate = startDate + 39;
@@ -52,10 +51,10 @@ ss & ss1
 
 %% Simulate Disinflation
 %
-% Simulate the low-inflation model, `m`, starting from the steady state of
-% the high-inflation model, `m1`.
+% Simulate the low-inflation model, |m|, starting from the steady state of
+% the high-inflation model, |m1|.
 
-d1 = sstatedb(m1, startDate-3:endDate);
+d1 = sstatedb(m1, startDate-3:endDate+100);
 s = simulate(m, d1, startDate:endDate, 'AppendPresample=', true);
 s = dbminuscontrol(m, s, d1);
 
@@ -107,16 +106,8 @@ legend('\xi_p=60', '\xi_p=80', '\xi_p=100', '\xi_p=120', ...
    'location', 'northWest');
 sacRat{startDate:endDate}
 
-%% Help on IRIS Functions Used in This File
-%
-% Use either `help` to display help in the command window, or `idoc`
-% to display help in an HTML browser window.
-%
-%    help model/subsasgn
-%    help model/solve
-%    help model/sstate
-%    help model/sstatedb
-%    help model/simulate
-%    help dbase/dbplot
-%    help dbase/dboverlay
-    
+
+%% Show Variables and Objects Created in This File                         
+
+whos
+

@@ -1,0 +1,494 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>Model Solution Matrices</title><meta name="generator" content="MATLAB 9.3"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2018-02-03"><meta name="DC.source" content="know_all_about_solution.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body { margin-left:5%; margin-right:35% }
+@media print {html body {margin-left:0px; margin-right:0px}}
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+/* tt { font-size: 1.2em; } */
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:1000%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>Model Solution Matrices</h1><!--introduction--><p>Describe and retrieve the state-space form of a solved model. IRIS uses a state-space form with two modifications. First, the state-space system is transformed so that the transition matrix is upper triangular (or more precisely, quasi-triangular with 1-by-1 or 2-by-2 blocks on the main diagonal). Second, the effect of future anticipated shocks can be directly computed upon request, and added to the system stored in the model object.</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Clear Workspace</a></li><li><a href="#2">Load Solved Model Object</a></li><li><a href="#3">First Order Solution (State Space)</a></li><li><a href="#4">Transition Matrix</a></li><li><a href="#5">Variables in State Space Vector</a></li><li><a href="#6">Forward Expansion of Model Solution</a></li><li><a href="#7">Show Variables and Objects Created in This File</a></li></ul></div><h2 id="1">Clear Workspace</h2><p>Clear workspace, close all graphics figures, clear command window, and check the IRIS version.</p><pre class="codeinput">clear
+close <span class="string">all</span>
+clc
+irisrequired <span class="string">20180131</span>
+</pre><h2 id="2">Load Solved Model Object</h2><p>Load the solved model object built in <a href="read_model.html">read_model</a>.</p><pre class="codeinput">load <span class="string">mat/read_model.mat</span> <span class="string">m</span>;
+</pre><h2 id="3">First Order Solution (State Space)</h2><p>The function <tt>solve( )</tt> executed earlier in <a href="read_model.html">read_model</a> computes the first-order accurate state-space representation of the model. IRIS uses a transformed representation that has a number of advantages.</p><p><img src="html-source/know_all_about_solution_eq17459261465532839777.png" alt="$$ [x^f_t;\alpha_t] = T \alpha_{t-1}&#xA;+ K + R_1 e_t + R_2 \, \mathrm E_t \, [e_{t+1}] + \ldots $$" style="width:223px;height:14px;"></p><p><img src="html-source/know_all_about_solution_eq15236715458433108527.png" alt="$$ y_t = Z \alpha_t + D + H e_t $$" style="width:96px;height:10px;"></p><p><img src="html-source/know_all_about_solution_eq08011618611520183851.png" alt="$$ x^b_t = U \alpha_t $$" style="width:43px;height:13px;"></p><p><img src="html-source/know_all_about_solution_eq13357899494702929466.png" alt="$$ \mathrm E[ e_t e_t' ] = \Omega $$" style="width:53px;height:12px;"></p><div><ul><li><img src="html-source/know_all_about_solution_eq16847673119519352865.png" alt="$x^f$" style="width:11px;height:10px;"> non-predetermined (forward-looking) variables;</li><li><img src="html-source/know_all_about_solution_eq09737209834808956210.png" alt="$x^b$" style="width:10px;height:10px;"> predetermined (backward-looking) transition variable;</li><li><img src="html-source/know_all_about_solution_eq12226254761175012236.png" alt="$e$" style="width:5px;height:6px;"> residuals;</li><li><img src="html-source/know_all_about_solution_eq08830444604280721118.png" alt="$y$" style="width:6px;height:8px;"> measurement variables;</li><li><img src="html-source/know_all_about_solution_eq14221827199139923399.png" alt="$\alpha$" style="width:7px;height:6px;"> vector of transformed pre-determined variables;</li><li><img src="html-source/know_all_about_solution_eq14047577632175690031.png" alt="$T$" style="width:8px;height:8px;"> transition matrix; the transformed vector <img src="html-source/know_all_about_solution_eq14221827199139923399.png" alt="$\alpha$" style="width:7px;height:6px;"> is set up so that <img src="html-source/know_all_about_solution_eq14047577632175690031.png" alt="$T$" style="width:8px;height:8px;"> is upper quasi-triangular -- see next section.</li></ul></div><pre class="codeinput">[T, R, K, Z, H, D, U, Omg] = sspace(m); <span class="comment">%#ok&lt;ASGLU&gt;</span>
+
+disp(<span class="string">'State-space matrices'</span>);
+
+disp(<span class="string">'Size of T'</span>);
+sizeOfT = size(T) <span class="comment">%#ok&lt;NOPTS&gt;</span>
+
+disp(<span class="string">'Size of R'</span>);
+sizeOfR = size(R) <span class="comment">%#ok&lt;NOPTS&gt;</span>
+
+disp(<span class="string">'Size of K'</span>);
+size(K)
+
+disp(<span class="string">'Size of Z'</span>);
+size(Z)
+
+disp(<span class="string">'Covariance matrix of residuals'</span>);
+Omg <span class="comment">%#ok&lt;NOPTS&gt;</span>
+</pre><pre class="codeoutput">State-space matrices
+Size of T
+
+sizeOfT =
+
+    24    13
+
+Size of R
+
+sizeOfR =
+
+    24     7
+
+Size of K
+
+ans =
+
+    24     1
+
+Size of Z
+
+ans =
+
+     4    13
+
+Covariance matrix of residuals
+
+Omg =
+
+   1.0e-04 *
+
+         0         0         0         0         0         0         0
+         0         0         0         0         0         0         0
+         0         0    0.9901         0         0         0         0
+         0         0         0    0.9901         0         0         0
+         0         0         0         0    0.0100         0         0
+         0         0         0         0         0    0.9901         0
+         0         0         0         0         0         0    0.9901
+
+</pre><h2 id="4">Transition Matrix</h2><p>The transition matrix <tt>T</tt> can be divided into the upper part <tt>Tf</tt> (which determines the non-predetermined variables) and the square lower part <tt>Ta</tt> (which determines the vector alpha). The matrix <tt>Tf</tt> is in general rectangular, <tt>nf</tt>-by-|nb|, whereas <tt>Ta</tt> is a sqaure matrix, <tt>nb</tt>-by-|nb|. The dynamics of the model is solely given by <tt>Ta</tt>; the transformation <tt>alpha</tt> is chosen so that <tt>Ta</tt> is always upper quasi-triangular.</p><p>The number of non-predetermined (forward-looking) variables and the number of predetermined (backward-looking) variables (which equals the size of the vector <img src="html-source/know_all_about_solution_eq14221827199139923399.png" alt="$\alpha$" style="width:7px;height:6px;">) can be derived from the size of the matrix <tt>T</tt>.</p><pre class="codeinput">nx = size(T, 1);
+nb = size(T, 2);
+nf = nx - nb;
+
+disp(<span class="string">'Size of transition matrix T'</span>)
+sizeOfT <span class="comment">%#ok&lt;NOPTS&gt;</span>
+
+disp(<span class="string">'Length of vector x'</span>)
+nx <span class="comment">%#ok&lt;NOPTS&gt;</span>
+
+disp(<span class="string">'Length of vector xf'</span>)
+nf <span class="comment">%#ok&lt;NOPTS&gt;</span>
+
+disp(<span class="string">'Length of vector xb (and alpha)'</span>)
+nb <span class="comment">%#ok&lt;NOPTS&gt;</span>
+
+Tf = T(1:nf, :);
+Ta = T(nf+1:end, :);
+
+figure();
+spy(Ta);
+title(<span class="string">'Nonzero entries in lower transition matrix'</span>);
+
+disp(<span class="string">'Unit roots in model solution'</span>)
+unitRoots = get(m, <span class="string">'unitRoots'</span>) <span class="comment">%#ok&lt;NOPTS&gt;</span>
+
+nUnit = length(unitRoots);
+Ta(1:nUnit, 1:nUnit)
+</pre><pre class="codeoutput">Size of transition matrix T
+
+sizeOfT =
+
+    24    13
+
+Length of vector x
+
+nx =
+
+    24
+
+Length of vector xf
+
+nf =
+
+    11
+
+Length of vector xb (and alpha)
+
+nb =
+
+    13
+
+Unit roots in model solution
+
+unitRoots =
+
+    1.0000    1.0000
+
+
+ans =
+
+    1.0000    0.0000
+         0    1.0000
+
+</pre><img vspace="5" hspace="5" src="html-source/know_all_about_solution_01.png" alt=""> <h2 id="5">Variables in State Space Vector</h2><p>Find out the order in which the individual variables occur in the rows and columns of the state-space matrices. The vector of measurement variables and the vector of shocks are straightforward -- they are ordered as they are declared in the model code (with the measurement shocks preceding the transition shocks). The vector of transition variables contain also all auxiliary lags and leads.</p><pre class="codeinput">disp(<span class="string">'Vector of transition variables (x)'</span>)
+xvector = get(m, <span class="string">'XVector'</span>) <span class="comment">%#ok&lt;NOPTS&gt;</span>
+
+disp(<span class="string">'Vector of measurement variables (y)'</span>)
+yvector = get(m, <span class="string">'YVector'</span>) <span class="comment">%#ok&lt;NOPTS&gt;</span>
+
+disp(<span class="string">'Vector of shocks (e)'</span>)
+evector = get(m, <span class="string">'EVector'</span>) <span class="comment">%#ok&lt;NOPTS&gt;</span>
+</pre><pre class="codeoutput">Vector of transition variables (x)
+
+xvector =
+
+  24x1 cell array
+
+    {'log_dP{+3}'}
+    {'log_dP{+2}'}
+    {'log_dP{+1}'}
+    {'log_N'     }
+    {'log_Q'     }
+    {'log_H'     }
+    {'log_Pk'    }
+    {'log_Rk'    }
+    {'log_Lambda'}
+    {'log_d4P'   }
+    {'log_RMC'   }
+    {'log_Y'     }
+    {'log_W'     }
+    {'log_A'     }
+    {'log_dA'    }
+    {'log_P'     }
+    {'log_R'     }
+    {'log_dP'    }
+    {'log_dW'    }
+    {'log_Y{-1}' }
+    {'log_W{-1}' }
+    {'log_P{-1}' }
+    {'log_P{-2}' }
+    {'log_P{-3}' }
+
+Vector of measurement variables (y)
+
+yvector =
+
+  4x1 cell array
+
+    {'Short' }
+    {'Infl'  }
+    {'Growth'}
+    {'Wage'  }
+
+Vector of shocks (e)
+
+evector =
+
+  7x1 cell array
+
+    {'Mp'}
+    {'Mw'}
+    {'Ey'}
+    {'Ep'}
+    {'Ea'}
+    {'Er'}
+    {'Ew'}
+
+</pre><h2 id="6">Forward Expansion of Model Solution</h2><p>Forward expansion of the solution is needed in simulations or forecasts with future anticipated shocks. Use the function <tt>expand( )</tt> to calculate and store the expansion in the model object. Alternatively, if not available, the expansion is automatically added whenever the functions <tt>simulate( )</tt> or <tt>jforecast( )</tt> are executed with future anticipated shocks.</p><pre class="codeinput">k = get(m, <span class="string">'forward'</span>);
+
+disp(<span class="string">'Solution is now expanded t+k periods forward'</span>)
+k <span class="comment">%#ok&lt;NOPTS&gt;</span>
+
+m = expand(m, 2);
+
+disp(<span class="string">'Solution is now expanded t+k periods forward'</span>)
+k = get(m, <span class="string">'Forward'</span>) <span class="comment">%#ok&lt;NOPTS&gt;</span>
+
+[T, R, K, Z, H, D, U, Omg] = sspace(m);
+
+disp(<span class="string">'Size of the matrix R before expansion'</span>)
+sizeOfR <span class="comment">%#ok&lt;NOPTS&gt;</span>
+
+disp(<span class="string">'Size of the matrix R after expansion'</span>)
+size(R)
+</pre><pre class="codeoutput">Solution is now expanded t+k periods forward
+
+k =
+
+     0
+
+Solution is now expanded t+k periods forward
+
+k =
+
+     2
+
+Size of the matrix R before expansion
+
+sizeOfR =
+
+    24     7
+
+Size of the matrix R after expansion
+
+ans =
+
+    24    21
+
+</pre><h2 id="7">Show Variables and Objects Created in This File</h2><pre class="codeinput">whos
+</pre><pre class="codeoutput">  Name            Size            Bytes  Class     Attributes
+
+  D               4x1                32  double              
+  H               4x7               224  double              
+  K              24x1               192  double              
+  Omg             7x7               392  double              
+  R              24x21             4032  double              
+  T              24x13             2496  double              
+  Ta             13x13             1352  double              
+  Tf             11x13             1144  double              
+  U              13x13             1352  double              
+  Z               4x13              416  double              
+  ans             1x2                16  double              
+  evector         7x1               812  cell                
+  k               1x1                 8  double              
+  m               1x1             94388  model               
+  nUnit           1x1                 8  double              
+  nb              1x1                 8  double              
+  nf              1x1                 8  double              
+  nx              1x1                 8  double              
+  sizeOfR         1x2                16  double              
+  sizeOfT         1x2                16  double              
+  unitRoots       1x2                16  double              
+  xvector        24x1              3026  cell                
+  yvector         4x1               486  cell                
+
+</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2017b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% Model Solution Matrices
+%
+% Describe and retrieve the state-space form of a solved model. IRIS uses a
+% state-space form with two modifications. First, the state-space system is
+% transformed so that the transition matrix is upper triangular (or more
+% precisely, quasi-triangular with 1-by-1 or 2-by-2 blocks on the main
+% diagonal). Second, the effect of future anticipated shocks can be
+% directly computed upon request, and added to the system stored in the
+% model object.
+
+%% Clear Workspace
+%
+% Clear workspace, close all graphics figures, clear command window, and
+% check the IRIS version.
+
+clear
+close all
+clc
+irisrequired 20180131
+
+%% Load Solved Model Object
+%
+% Load the solved model object built in <read_model.html read_model>.
+
+load mat/read_model.mat m;
+
+%% First Order Solution (State Space)
+%
+% The function |solve( )| executed earlier in <read_model.html read_model>
+% computes the first-order accurate state-space representation of the
+% model. IRIS uses a transformed representation that has a number of
+% advantages.
+%
+% $$ [x^f_t;\alpha_t] = T \alpha_{t-1} 
+% + K + R_1 e_t + R_2 \, \mathrm E_t \, [e_{t+1}] + \ldots $$
+%
+% $$ y_t = Z \alpha_t + D + H e_t $$
+%
+% $$ x^b_t = U \alpha_t $$
+%
+% $$ \mathrm E[ e_t e_t' ] = \Omega $$
+%
+% * $x^f$ non-predetermined (forward-looking) variables;
+% * $x^b$ predetermined (backward-looking) transition variable;
+% * $e$ residuals;
+% * $y$ measurement variables;
+% * $\alpha$ vector of transformed pre-determined variables;
+% * $T$ transition matrix; the transformed vector $\alpha$ is set up so
+% that $T$ is upper quasi-triangular REPLACE_WITH_DASH_DASH see next section.
+%
+
+[T, R, K, Z, H, D, U, Omg] = sspace(m); %#ok<ASGLU>
+
+disp('State-space matrices');
+
+disp('Size of T');
+sizeOfT = size(T) %#ok<NOPTS>
+
+disp('Size of R');
+sizeOfR = size(R) %#ok<NOPTS>
+
+disp('Size of K');
+size(K)
+
+disp('Size of Z');
+size(Z)
+
+disp('Covariance matrix of residuals');
+Omg %#ok<NOPTS>
+
+%% Transition Matrix
+%
+% The transition matrix |T| can be divided into the upper part |Tf| (which
+% determines the non-predetermined variables) and the square lower part
+% |Ta| (which determines the vector alpha). The matrix |Tf| is in general
+% rectangular, |nf|-by-|nb|, whereas |Ta| is a sqaure matrix, |nb|-by-|nb|.
+% The dynamics of the model is solely given by |Ta|; the transformation
+% |alpha| is chosen so that |Ta| is always upper quasi-triangular.
+%
+% The number of non-predetermined (forward-looking) variables and the number
+% of predetermined (backward-looking) variables (which equals the size of
+% the vector $\alpha$) can be derived from the size of the matrix |T|.
+
+nx = size(T, 1);
+nb = size(T, 2);
+nf = nx - nb;
+
+disp('Size of transition matrix T')
+sizeOfT %#ok<NOPTS>
+
+disp('Length of vector x')
+nx %#ok<NOPTS>
+
+disp('Length of vector xf')
+nf %#ok<NOPTS>
+
+disp('Length of vector xb (and alpha)')
+nb %#ok<NOPTS>
+
+Tf = T(1:nf, :);
+Ta = T(nf+1:end, :);
+
+figure();
+spy(Ta);
+title('Nonzero entries in lower transition matrix');
+
+disp('Unit roots in model solution')
+unitRoots = get(m, 'unitRoots') %#ok<NOPTS>
+
+nUnit = length(unitRoots);
+Ta(1:nUnit, 1:nUnit)
+
+%% Variables in State Space Vector
+%
+% Find out the order in which the individual variables occur in the rows
+% and columns of the state-space matrices. The vector of measurement
+% variables and the vector of shocks are straightforward REPLACE_WITH_DASH_DASH they are
+% ordered as they are declared in the model code (with the measurement
+% shocks preceding the transition shocks). The vector of transition
+% variables contain also all auxiliary lags and leads.
+
+disp('Vector of transition variables (x)')
+xvector = get(m, 'XVector') %#ok<NOPTS>
+
+disp('Vector of measurement variables (y)')
+yvector = get(m, 'YVector') %#ok<NOPTS>
+
+disp('Vector of shocks (e)')
+evector = get(m, 'EVector') %#ok<NOPTS>
+
+%% Forward Expansion of Model Solution
+%
+% Forward expansion of the solution is needed in simulations or forecasts
+% with future anticipated shocks. Use the function |expand( )| to calculate
+% and store the expansion in the model object. Alternatively, if not
+% available, the expansion is automatically added whenever the functions
+% |simulate( )| or |jforecast( )| are executed with future anticipated
+% shocks.
+
+k = get(m, 'forward');
+
+disp('Solution is now expanded t+k periods forward')
+k %#ok<NOPTS>
+
+m = expand(m, 2);
+
+disp('Solution is now expanded t+k periods forward')
+k = get(m, 'Forward') %#ok<NOPTS>
+
+[T, R, K, Z, H, D, U, Omg] = sspace(m);
+
+disp('Size of the matrix R before expansion')
+sizeOfR %#ok<NOPTS>
+
+disp('Size of the matrix R after expansion')
+size(R)
+
+%% Show Variables and Objects Created in This File                         
+
+whos
+
+
+##### SOURCE END #####
+--></body></html>

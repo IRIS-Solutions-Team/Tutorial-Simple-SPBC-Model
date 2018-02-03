@@ -1,0 +1,342 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>Simple SPBC Model File</title><meta name="generator" content="MATLAB 9.3"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2018-02-03"><meta name="DC.source" content="simple_SPBC.model.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>Simple SPBC Model File</h1><!--introduction--><p>This is a model file for a simple sticky-price business model. The model file describes variables, parameters and equations. Note that the model file does not specifies the tasks that will be performed with the model. The tasks will be set up in separate m-files, using standard Matlab functions and IRIS functions.</p><p>Model files themselves cannot be executed. Instead, they are read in and converted into model objects by the IRIS function <tt>model( )</tt>. This is shown in <a href="read_model.html">read_model</a>.</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Declare Variables, Shocks, Parameters</a></li><li><a href="#2">Declare Measurement Variables (Observables)</a></li><li><a href="#3">Control Linearized and Log-Linerised Variables</a></li><li><a href="#4">Write Model Equations</a></li><li><a href="#5">Write Measurement Equations</a></li><li><a href="#6">Parameters for Deterministic Trends</a></li><li><a href="#7">Write Deterministic Trends on Measurement Variables</a></li></ul></div><h2 id="1">Declare Variables, Shocks, Parameters</h2><p>Use single-quoted text preceding the respective name to annotate the variablews, shocks, or parameters.  These descriptions are stored in the resulting model object as well.</p><pre class="codeinput"><span class="syscmd">!transition_variables</span>
+
+    <span class="string">'Output'</span> Y, <span class="string">'Labor'</span> N, <span class="string">'Wage rate'</span> W
+    <span class="string">'Nominal Marginal Cost'</span> Q, <span class="string">'Consumption Habit'</span> H, <span class="string">'Productivity'</span> A
+    <span class="string">'Rate of Change in Productivity'</span> dA
+    <span class="string">'Final Prices'</span> P, <span class="string">'Interest Rate'</span> R,
+    <span class="string">'Price of Capital'</span> Pk
+    <span class="string">'Rental Price of Capital'</span> Rk
+    <span class="string">'Households Shadow Value of Wealth'</span> Lambda
+    <span class="string">'Inflation Q/Q'</span> dP, <span class="string">'Inflation Y/Y'</span> d4P, <span class="string">'Wage Inflation Q/Q'</span> dW
+    <span class="string">'Real Marginal Cost'</span> RMC
+
+<span class="syscmd">!transition_shocks</span>
+
+    <span class="string">'Consumption Demand Shock'</span> Ey, <span class="string">'Cost Push Shock'</span> Ep,
+    <span class="string">'Productivity Shock'</span> Ea, <span class="string">'Policy Shock'</span> Er
+    <span class="string">'Wage Shock'</span> Ew
+
+<span class="syscmd">!parameters</span>
+
+    <span class="string">'Long Run Growth !! \alpha'</span> alpha, <span class="string">'Discount !! \beta'</span> beta, <span class="keyword">...</span>
+    <span class="string">'Labor Share !! \gamma'</span> gamma, <span class="string">'Depreciation !! \delta'</span> delta,
+    k, pi, eta, psi
+
+    <span class="string">'Habit !! \chi'</span> chi, <span class="string">'Wage Stickiness !! \xi_w'</span> xiw,
+    <span class="string">'Price Stickiness !! \xi_p'</span> xip, rhoa, rhor, kappap, kappan
+
+<span class="comment">%</span>
+</pre><h2 id="2">Declare Measurement Variables (Observables)</h2><pre class="codeinput"><span class="syscmd">!measurement_variables</span>
+
+    <span class="string">'Short Term Rate'</span> Short, <span class="string">'Price Inflation'</span> Infl,
+    <span class="string">'Output Growth'</span> Growth, <span class="string">'Wage Inflation'</span> Wage
+
+<span class="syscmd">!measurement_shocks</span>
+
+    <span class="string">'Measurement Error on Price Inflation'</span> Mp,
+    <span class="string">'Measurement Error on Wage Inflation'</span> Mw
+
+<span class="comment">%</span>
+</pre><h2 id="3">Control Linearized and Log-Linerised Variables</h2><p>By default, all variables are linearized when the first-order solution is computed in non-linear models. If you want some variables to be log-linearized instead, use the <tt>!log_variables</tt> section. Note how the keyword <tt>!all_but</tt> reverses the logic of this section -- all variables will be log-linearized except those listed here.</p><pre class="codeinput"><span class="syscmd">!log_variables</span>
+
+    <span class="syscmd">!all_but</span>
+    Short, Infl, Growth, Wage
+
+<span class="comment">%</span>
+</pre><h2 id="4">Write Model Equations</h2><p>Each equation must end with a semicolon. As in variable declaration, equations also can be annotated with a single-quoted text preceding the equation.</p><pre class="codeinput"><span class="syscmd">!transition_equations</span>
+
+    <span class="comment">% Consumers</span>
+
+    P*Lambda =# (1-chi)/(Y - chi*H) <span class="syscmd">!! P*Y*Lambda = 1;</span>
+    Lambda = beta*R*Lambda{1} <span class="syscmd">!! beta*R = alpha*pi;</span>
+    H = exp(Ey)*alpha*Y{-1} <span class="syscmd">!! H = Y;</span>
+
+    <span class="string">'Wage Phillips Curve'</span> xiw/(eta-1)*(dW/dW{-1} - 1) = <span class="keyword">...</span>
+      beta*xiw/(eta-1)*(dW{1}/dW - 1 + Ew) <span class="keyword">...</span>
+      + (eta/(eta-1)*N^psi/(Lambda*W) - 1) <span class="keyword">...</span>
+      <span class="syscmd">!! eta/(eta-1)*N^psi = Lambda*W;</span>
+
+    <span class="comment">% Price of Capital</span>
+
+    Lambda*Pk = beta*Lambda{1}*(Rk{1} + (1-delta)*Pk{1});
+
+    <span class="comment">% Supply Side</span>
+
+    <span class="string">'Production Function'</span> Y = A * (N - (1-gamma)*$N)^gamma * k^(1-gamma);
+    gamma*Q*Y =# W*(N - (1-gamma)*$N);
+    (1-gamma)*Q*Y = Rk*k;
+
+    <span class="string">'Price Phillips Curve'</span> xip/(eta-1)*(dP/dP{-1} - 1) = <span class="keyword">...</span>
+      beta*xip/(eta-1)*(dP{1}/dP - 1 + Ep) <span class="keyword">...</span>
+      + (eta/(eta-1)*RMC - 1) <span class="syscmd">!! eta/(eta-1)*Q = P;</span>
+
+    RMC = Q/P <span class="syscmd">!! RMC = (eta-1)/eta;</span>
+
+    <span class="comment">% Productivity.</span>
+
+    log(dA) = rhoa*log(dA{-1}) + (1-rhoa)*log(alpha) + Ea;
+    dA = A/A{-1};
+
+    <span class="comment">% Monetary Policy</span>
+
+    log(R) = rhor*log(R{-1}) + (1-rhor)*(log($R) <span class="keyword">...</span>
+       + kappap*(log(dP{4}) - log(pi)) <span class="keyword">...</span>
+      + kappan*(N/$N - 1)) + Er
+      <span class="syscmd">!! d4P = pi^4;</span>
+
+    <span class="comment">% One-Quarter and Four-Quarter Rates of Change</span>
+
+    dP = P/P{-1};
+    d4P = P/P{-4};
+    dW = W/W{-1};
+
+<span class="comment">%</span>
+</pre><h2 id="5">Write Measurement Equations</h2><pre class="codeinput"><span class="syscmd">!measurement_equations</span>
+
+    Short =  100*(R^4 - 1);
+    Infl = 100*((P/P{-1})^4 - 1 + Mp);
+    Wage = 100*((W/W{-1})^4 - 1 + Mw);
+    Growth = 100*((Y/Y{-1})^4 - 1);
+
+<span class="comment">%</span>
+</pre><h2 id="6">Parameters for Deterministic Trends</h2><pre class="codeinput"><span class="syscmd">!parameters</span>
+
+    Short_, Infl_, Growth_, Wage_
+</pre><h2 id="7">Write Deterministic Trends on Measurement Variables</h2><pre class="codeinput"><span class="syscmd">!dtrends</span>
+
+    Short <span class="string">+=</span> <span class="string">Short_</span>;
+    Infl <span class="string">+=</span> <span class="string">Infl_</span>;
+    Growth <span class="string">+=</span> <span class="string">Growth_</span>;
+    Wage <span class="string">+=</span> <span class="string">Wage_</span>;
+</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2017b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% Simple SPBC Model File
+%
+% This is a model file for a simple sticky-price business model. The model
+% file describes variables, parameters and equations. Note that the model
+% file does not specifies the tasks that will be performed with the model.
+% The tasks will be set up in separate m-files, using standard Matlab
+% functions and IRIS functions.
+%
+% Model files themselves cannot be executed. Instead, they are read in and
+% converted into model objects by the IRIS function |model( )|. This is
+% shown in <read_model.html read_model>.
+%
+
+%% Declare Variables, Shocks, Parameters
+%
+% Use single-quoted text preceding the respective name to annotate the
+% variablews, shocks, or parameters.  These descriptions are stored in the
+% resulting model object as well.
+
+!transition_variables
+
+    'Output' Y, 'Labor' N, 'Wage rate' W
+    'Nominal Marginal Cost' Q, 'Consumption Habit' H, 'Productivity' A
+    'Rate of Change in Productivity' dA
+    'Final Prices' P, 'Interest Rate' R,
+    'Price of Capital' Pk
+    'Rental Price of Capital' Rk
+    'Households Shadow Value of Wealth' Lambda
+    'Inflation Q/Q' dP, 'Inflation Y/Y' d4P, 'Wage Inflation Q/Q' dW
+    'Real Marginal Cost' RMC
+   
+!transition_shocks
+
+    'Consumption Demand Shock' Ey, 'Cost Push Shock' Ep, 
+    'Productivity Shock' Ea, 'Policy Shock' Er
+    'Wage Shock' Ew
+
+!parameters
+
+    'Long Run Growth !! \alpha' alpha, 'Discount !! \beta' beta, ...
+    'Labor Share !! \gamma' gamma, 'Depreciation !! \delta' delta,
+    k, pi, eta, psi
+    
+    'Habit !! \chi' chi, 'Wage Stickiness !! \xi_w' xiw,
+    'Price Stickiness !! \xi_p' xip, rhoa, rhor, kappap, kappan
+
+%
+   
+%% Declare Measurement Variables (Observables)
+
+!measurement_variables
+
+    'Short Term Rate' Short, 'Price Inflation' Infl,
+    'Output Growth' Growth, 'Wage Inflation' Wage
+   
+!measurement_shocks
+
+    'Measurement Error on Price Inflation' Mp,
+    'Measurement Error on Wage Inflation' Mw
+ 
+%
+
+%% Control Linearized and Log-Linerised Variables
+%
+% By default, all variables are linearized when the first-order solution is
+% computed in non-linear models. If you want some variables to be
+% log-linearized instead, use the |!log_variables| section. Note how the
+% keyword |!all_but| reverses the logic of this section REPLACE_WITH_DASH_DASH all variables
+% will be log-linearized except those listed here.
+   
+!log_variables
+
+    !all_but
+    Short, Infl, Growth, Wage
+ 
+%
+   
+%% Write Model Equations
+%
+% Each equation must end with a semicolon. As in variable declaration,
+% equations also can be annotated with a single-quoted text preceding the
+% equation.
+
+!transition_equations
+
+    % Consumers
+
+    P*Lambda =# (1-chi)/(Y - chi*H) !! P*Y*Lambda = 1;
+    Lambda = beta*R*Lambda{1} !! beta*R = alpha*pi;
+    H = exp(Ey)*alpha*Y{-1} !! H = Y;
+
+    'Wage Phillips Curve' xiw/(eta-1)*(dW/dW{-1} - 1) = ...
+      beta*xiw/(eta-1)*(dW{1}/dW - 1 + Ew) ...
+      + (eta/(eta-1)*N^psi/(Lambda*W) - 1) ...
+      !! eta/(eta-1)*N^psi = Lambda*W;
+
+    % Price of Capital
+
+    Lambda*Pk = beta*Lambda{1}*(Rk{1} + (1-delta)*Pk{1});
+
+    % Supply Side
+
+    'Production Function' Y = A * (N - (1-gamma)*$N)^gamma * k^(1-gamma);
+    gamma*Q*Y =# W*(N - (1-gamma)*$N);
+    (1-gamma)*Q*Y = Rk*k;
+
+    'Price Phillips Curve' xip/(eta-1)*(dP/dP{-1} - 1) = ...
+      beta*xip/(eta-1)*(dP{1}/dP - 1 + Ep) ...
+      + (eta/(eta-1)*RMC - 1) !! eta/(eta-1)*Q = P;
+
+    RMC = Q/P !! RMC = (eta-1)/eta;
+
+    % Productivity.
+    
+    log(dA) = rhoa*log(dA{-1}) + (1-rhoa)*log(alpha) + Ea;
+    dA = A/A{-1};
+
+    % Monetary Policy
+
+    log(R) = rhor*log(R{-1}) + (1-rhor)*(log($R) ...
+       + kappap*(log(dP{4}) - log(pi)) ...
+      + kappan*(N/$N - 1)) + Er
+      !! d4P = pi^4;
+
+    % One-Quarter and Four-Quarter Rates of Change
+
+    dP = P/P{-1};
+    d4P = P/P{-4};
+    dW = W/W{-1};
+
+%
+   
+%% Write Measurement Equations
+
+!measurement_equations
+
+    Short =  100*(R^4 - 1);
+    Infl = 100*((P/P{-1})^4 - 1 + Mp);
+    Wage = 100*((W/W{-1})^4 - 1 + Mw);
+    Growth = 100*((Y/Y{-1})^4 - 1);
+ 
+%
+
+%% Parameters for Deterministic Trends
+
+!parameters
+
+    Short_, Infl_, Growth_, Wage_
+
+   
+%% Write Deterministic Trends on Measurement Variables
+
+!dtrends
+
+    Short += Short_;
+    Infl += Infl_;
+    Growth += Growth_;
+    Wage += Wage_;
+   
+
+##### SOURCE END #####
+--></body></html>

@@ -1,30 +1,40 @@
 %% Forecasts with Judgmental Adjustments
-% by Jaromir Benes
 %
 % Use the Kalman filtered data as the starting point for forecasts, both
 % unconditional and conditional, i.e. with various types of judgmental
 % adjustments.
+
+%% Dependencies                                                            
+%
+% Run the following m-files before this one:
+%
+% * <read_data.html |read_data|>
+% * <estimate_params.html |estimate_params|>
+% * <filter_hist_data.html |filter_hist_data|>
+%
+
 
 %% Clear Workspace
 %
 % Clear workspace, close all graphics figures, clear command window, and
 % check the IRIS version.
 
-clear;
-close all;
-clc;
-irisrequired 20140315;
+clear
+close all
+clc
+irisrequired 20180131
+
 
 %% Load Estimated Model Object, Filtered Data, and Historical Database
 %
-% Load the model object estimated in `estimate_params`, the filtered
-% (smoothed) data from a Kalman filter in `filter_hist_data`, and the
-% historical database created in `read_data`. Run `estimate_params` and
-% `filter_hist_data` at least once before running this m-file.
+% Load the model object estimated in |estimate_params|, the filtered
+% (smoothed) data from a Kalman filter in |filter_hist_data|, and the
+% historical database created in |read_data|. 
 
-load MAT/estimate_params.mat mest;
-load MAT/filter_hist_data.mat f;
-load MAT/read_data.mat d startHist endHist;
+load mat/estimate_params.mat mest
+load mat/filter_hist_data.mat f
+load mat/read_data.mat d startHist endHist
+
 
 %% Define Dates
 
@@ -36,8 +46,8 @@ highRng = startPlot:endHist;
 
 %% Define Graphics Styles
 %
-% The structs `sty1` and `sty2` are used in the option `'Style='` in
-% `qplot` to automatically style the graphs plotted.
+% The structs |sty1| and |sty2| are used in the option |Style=| in
+% |dbplot( )| to automatically style the graphs plotted.
 
 sty1 = struct( );
 sty1.Line.Color = @first;
@@ -58,7 +68,7 @@ sty2.Legend.FontSize = 7;
 %% Run Unconditional Forecast
 %
 % Unconditional forecast runs from the initial condition supplied in the
-% input database, `f`. The initial conditions consist of the mean and the
+% input database, |f|. The initial conditions consist of the mean and the
 % root mean square error (initial uncertainty) for each variable. Directly
 % observed variables have obviously RMSE zero, the unobservables (such as
 % productivity) have non-zero initial uncertainty.
@@ -73,7 +83,7 @@ u.std = dboverlay(f.std, u.std);
 
 %% Create Plot Lists
 %
-% Define variables and titles to appear in graphs created by `dbplot`
+% Define variables and titles to appear in graphs created by |dbplot( )|
 % functions after each forecast experiment.
 
 plotList1 = { ...
@@ -115,7 +125,7 @@ grfun.ftitle('Unconditional Forecasts');
 % The forecast with exogenised interest rates is run in an anticipated
 % mode.
 
-sc1 = Scenario(mest, startFcst:endFcst);
+sc1 = plan(mest, startFcst:endFcst);
 sc1 = exogenize(sc1, 'Short', startFcst:startFcst+3);
 sc1 = endogenize(sc1, 'Er', startFcst:startFcst+3);
 
@@ -124,7 +134,7 @@ f1.mean.Short(startFcst:startFcst+3, 1) = f.mean.Short(endHist);
 
 detail(sc1, f1);
 
-j1 = jforecast(mest, f1, startFcst:endFcst, 'Scenario=', sc1);
+j1 = jforecast(mest, f1, startFcst:endFcst, 'Plan=', sc1);
 
 %% Compare Exogenised Forecasts with Unconditional Forecasts
 
@@ -153,7 +163,7 @@ mest1.std_Er = 0;
 
 get(mest, 'Std') & get(mest1, 'Std') %#ok<NOPTS>
 
-sc2 = Scenario(mest1, startFcst:endFcst);
+sc2 = plan(mest1, startFcst:endFcst);
 sc2 = condition(sc2, 'Short', startFcst:startFcst+3);
 
 f2 = f;
@@ -164,7 +174,7 @@ c.Short = f2.mean.Short;
 
 detail(sc2, f2);
 
-j2 = jforecast(mest1, f2, startFcst:endFcst, c, 'Scenario=', sc2);
+j2 = jforecast(mest1, f2, startFcst:endFcst, c, 'Plan=', sc2);
 
 %% Compare Anticipated Conditional Forecasts with Unconditional Forecasts
 
@@ -188,7 +198,7 @@ sc3 = sc2;
 f3 = f2;
 
 j3 = jforecast(mest1, f3, startFcst:endFcst+50, ...
-    'Scenario=', sc3, 'anticipate=', false);
+    'Plan=', sc3, 'anticipate=', false);
 
 %% Compare Unanticipated Conditional Forecasts with Uncondtional Forecasts
 
@@ -208,7 +218,7 @@ grfun.ftitle('Unconditional vs Conditional on Unanticipated Short Rate');
 %
 % Combine two techniques together: exogenizing and conditioning.
 
-sc4 = Scenario(mest, startFcst:endFcst);
+sc4 = plan(mest, startFcst:endFcst);
 
 sc4 = exogenise(sc4, 'Short', startFcst:startFcst+3);
 sc4 = endogenise(sc4, 'Er', startFcst:startFcst+3);
@@ -219,7 +229,7 @@ f4 = f;
 f4.mean.Short(startFcst:startFcst+3) = f4.mean.Short(endHist);
 f4.mean.Infl(startFcst:startFcst+3) = f4.mean.Infl(endHist);
 
-j4 = jforecast(mest1, f4, startFcst:endFcst+50, 'Scenario=', sc4);
+j4 = jforecast(mest1, f4, startFcst:endFcst+50, 'Plan=', sc4);
 
 %% Verify Exogenised and Conditioned Data Points
 %
@@ -251,12 +261,10 @@ grfun.ftitle(['Unconditional vs ', ...
 
 %% Resimulate Point Forecasts
 %
-% The function `simulate` only uses the input database for initial
-% condition and in-sample shocks. The shocks backed out by `jforecast` are
-% such that they exactly reproduce the exogenised and/or conditioned data
-% points.
-%
-% * <?maxabs?> Use the function `maxabs` to report the max abs differences
+% The function |simulate( )| only uses the input database for initial
+% condition and in-sample shocks. The shocks backed out by |jforecast( )|
+% are such that they exactly reproduce the exogenised and/or conditioned
+% data points.  The function |maxabs( )| reports the max abs differences
 % between the fields of the same name in two structs (databases).
 
 s1 = simulate(mest1, j1.mean, startFcst:endFcst); 
@@ -264,19 +272,13 @@ s2 = simulate(mest1, j2.mean, startFcst:endFcst);
 s3 = simulate(mest1, j3.mean, startFcst:endFcst, 'anticipate=', false);
 s4 = simulate(mest1, j4.mean, startFcst:endFcst);
 
-maxabs(s1, j1.mean) ... %?maxabs?
+maxabs(s1, j1.mean) ... 
     & maxabs(s2, j2.mean) ...
     & maxabs(s3, j3.mean) ...
     & maxabs(s4, j4.mean) %#ok<NOPTS>
 
-%% Help on IRIS Functions Used in This Files
-%
-% Use either `help` to display help in the command window, or `idoc`
-% to display help in an HTML browser window.
-%
-%    help data/dbextend
-%    help model/jforecast
-%    help model/subsasgn
-%    help qreport/qplot
-%    help grfun/ftitle
-%    help maxabs
+
+%% Show Variables and Objects Created in This File                         
+
+whos
+

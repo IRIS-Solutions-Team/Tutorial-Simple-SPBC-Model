@@ -1,30 +1,39 @@
 %% Monte-Carlo Stochatic Simulations
-% by Jaromir Benes
 %
 % Draw random time series from the model distribution, and compare their
-% sample properties against the unconditional model-implied models. Keep in
-% mind that this is a purely simulation exercise, and no observed data
-% whatsoever are involved.
+% sample properties against the unconditional model-implied ones. In this
+% exercise, a calibrated model (and no actual data) is used to both
+% generate the random data samples as well as to calculate calculate
+% asymptotic statistics.
+
+%% Dependencies
+%
+% Run the following m-files before this one:
+%
+% * <read_model.html |read_model|>
+%
 
 %% Clear Workspace
 %
 % Clear workspace, close all graphics figures, clear command window, and
 % check the IRIS version.
 
-clear;
-close all;
-clc;
-irisrequired 20140315;
+clear
+close all
+clc
+irisrequired 20180131
 %#ok<*NOPTS>
  
-%% Load Solved model
+%% Load Solved Model
 %
-% Load the solved model object built in `read_model`. Run `read_model` at
-% least once before running this m-file.
+% Load the solved model object built in <read_model.html |read_model|>. 
 
-load MAT/read_model.mat m;
+load mat/read_model.mat m
 
 %% Define Dates
+%
+% Create quarterly dates for the start and end of the resampling period.
+%
 
 startDate = qq(1991, 1);
 endDate = qq(2020, 4);
@@ -40,16 +49,15 @@ endDate = qq(2020, 4);
 % In general, after changing some parameters the steady state and model
 % solution need to be re-calculated. However, std devs and corr coeff have
 % no impact on the steady state or solution so go ahead without running
-% `sstate` or `solve`.
+% |sstate( )| or |solve( )|.
 %
-% <?getstd?> This `get` command returns a database with the currently
-% assigned std deviations.
-%
-% <?getstd?> This `get` command returns a database with the currently
-% assigned non-zero cross-correlations.
+% * the |get( )| function with |'Std'| returns a database with the
+% currently assigned std deviations;
+% * the |get( )| function with |'NonzeroCorr'| returns a database
+% with the currently assigned non-zero cross-correlations.
 
-get(m, 'Std') %?getstd?
-get(m, 'NonzeroCorr') %?getnonzerocorr?
+get(m, 'Std') 
+get(m, 'NonzeroCorr') 
 
 m.std_Mp = 0.001;
 m.std_Mw = 0.001;
@@ -60,14 +68,13 @@ m.std_Ea = 0.001;
 m.std_Er = 0.005;
 m.corr_Ea__Ep = 0.25;
 
-get(m, 'Std') %?getstd?
-get(m, 'NonzeroCorr') %?getnonzerocorr?
+get(m, 'Std') 
+get(m, 'NonzeroCorr') 
 
-%% Draw Random Time Series from Model Distribution
+%% Draw Random Time Series from Model Distribution                         
 %
-% A total of `N` = 1,000 different time series samples for each variables
-% will be generated from the model distribution, each 30 years (120
-% quarters) long.
+% A total of 1,000 different time series samples for each variables will be
+% generated from the model distribution, each 30 years (120 quarters) long.
 
 J = struct( );
 J.std_Ey = Series( );
@@ -78,13 +85,13 @@ d = resample(m, [ ], startDate:endDate, N, J, 'Progress=', true);
 
 %% Re-Simulate Data
 %
-% If the resampled database, `d`, is used as an input database in
-% `simulate`, the simulated database will simply reproduce the paths. Note
+% If the resampled database, |d|, is used as an input database in
+% |simulate( )|, the simulated database will simply reproduce the paths. Note
 % that only initical condition and shocks are taken from the input
 % database. The paths for the endogenous variables contained in the input
 % database are completely ignored, and not used at all.
 %
-% Also, remember to set `'anticipate=' false` because `resample` produces
+% Also, remember to set |Anticipate=false| because |resample( )| produces
 % unanticipated shocks.
 
 d1 = simulate(m, d, startDate:endDate, ...
@@ -94,9 +101,9 @@ maxabs(d, d1)
 
 %% Compute Sample Properties of Simulated Time Series
 %
-% Calculate the sample mean, and use the `acf` function to calculate the
-% std dev and autocorrelation coefficients for the three measurement
-% variables, `Short`, `Infl`, and `Growth`.
+% Calculate the sample mean, and use the |acf( )| function to calculate the
+% std deviations and autocorrelation coefficients for the three measurement
+% variables, |Short|, |Infl|, and |Growth|.
 
 sampleMean = struct( );
 sampleStd = struct( );
@@ -121,11 +128,11 @@ sampleMean
 sampleStd
 sampleAutocorr
 
-%% Compute Corresponding Asymptotic Properties Analytically
+%% Compute Corresponding Asymptotic Properties Analytically                
 
-asymptMean = struct();
-asymptStd = struct();
-asymptAutocorr = struct();
+asymptMean = struct( );
+asymptStd = struct( );
+asymptAutocorr = struct( );
 
 [C, R] = acf(m, 'Order=', 1);
 C = select(C, {'Short', 'Infl', 'Growth'});
@@ -147,7 +154,7 @@ asymptMean
 asymptStd
 asymptAutocorr
 
-%% Plot Sample and Asymptotic Properties
+%% Plot Sample and Asymptotic Properties                                   
 
 list = {'Short', 'Infl', 'Growth'};
 figure( );
@@ -175,14 +182,8 @@ for i = 1 : length(list)
    title(['Autocorr ', list{i}]);
 end
 
-%% Help on IRIS Functions Used in This File
-%
-% Use either `help` to display help in the command window,  or `idoc`
-% to display help in an HTML browser window.
-%
-%   help model/acf
-%   help model/get
-%   help model/resample
-%   help model/subsasgn
-%   help tseries/acf
-%   help select
+
+%% Show Variables and Objects Created in This File                         
+
+whos
+
