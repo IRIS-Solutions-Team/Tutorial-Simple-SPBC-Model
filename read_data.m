@@ -22,52 +22,51 @@ irisrequired 20180131
 % |<Simple_SPBC_monthly.csv>|, |<Simple_SPBC_daily.csv>|) have been
 % downloaded from <http://research.stlouisfed.org/fred2>.
 %
-% Quarterly series:
+% Quarterly series
 %
-% * |GDPC96| -- Real Gross Domestic Product, 3 Decimal
-% * |GDPCTPI| -- Gross Domestic Product: Chain-type Price Index
+% * |GDPC96|:     Real Gross Domestic Product, 3 Decimal
+% * |GDPCTPI|:    Gross Domestic Product: Chain-type Price Index
 %
-% Monthly series:
+% Monthly series
 %
-% * |AHETPI| -- Average Hourly Earnings: Total Private Industries
-% * |CPILEGNS| -- Consumer Price Index for All Urban Consumers: All Items
-% Less Energy, Seasonally Not Adjusted
-% * |CPILEGSL| -- Consumer Price Index for All Urban Consumers: All Items
-% Less Energy, Seasonally Adjusted
-% * |GS5| -- 5-Year Treasury Constant Maturity Rate
-% * |PCE| -- Personal Consumption Expenditures
-% * |PCEC96| -- Real Personal Consumption Expenditures
-% * |TB3MS| -- 3-Month Treasury Bill: Secondary Market Rate
+% * |AHETPI|:     Average Hourly Earnings: Total Private Industries
+% * |CPILEGNS|:   Consumer Price Index for All Urban Consumers: All Items Less Energy, Seasonally Not Adjusted
+% * |CPILEGSL|:   Consumer Price Index for All Urban Consumers: All Items Less Energy, Seasonally Adjusted
+% * |GS5|:        5-Year Treasury Constant Maturity Rate
+% * |PCE|:        Personal Consumption Expenditures
+% * |PCEC96|:     Real Personal Consumption Expenditures
+% * |TB3MS|:      3-Month Treasury Bill: Secondary Market Rate
 %
-% Daily series:
+% Daily series
 %
-% * |SP500| -- S&P 500 Index
+% * |SP500|:      S&P 500 Index
 %
 
 rawQ = dbload('Simple_SPBC_quarterly.csv', ...
-    'freq=', 4, 'dateFormat=', 'YYYY-MM-01');
+    'Freq=', 4, 'DateFormat=', 'YYYY-MM-01');
+disp('Raw Quarterly Database')
+disp(rawQ)
 
-rawM = dbload('Simple_SPBC_monthly.csv', ...
-    'dateFormat=', 'YYYY-MM-01');
+
+rawM = dbload('Simple_SPBC_monthly.csv', 'DateFormat=', 'YYYY-MM-01');
+disp('Raw Monthly Database')
+disp(rawM)
+
 
 rawD = dbload('Simple_SPBC_daily.csv', ...
-   'freq=', 365, 'dateFormat=', 'YYYY-MM-DD');
+    'Freq=', 365, 'DateFormat=', 'YYYY-MM-DD');
+disp('Raw Daily Database')
+disp(rawD)
 
-disp('Quarterly Database')
-rawQ %#ok<NOPTS>
-
-disp('Monthly Database')
-rawM %#ok<NOPTS>
-
-disp('Daily Database')
-rawD %#ok<NOPTS>
 
 %% Display Daily Series
 %
 % Daily time series are printed in tabular format on the screen, with each
 % month occupying one entire row.
+%
 
 rawD.SP500
+
 
 %% Seasonally Adjust Series
 %
@@ -87,7 +86,8 @@ title('CPI Inflation, 1Q ROC');
 
 [C, R] = acf(pct([rawM.CPILEGNS, rawM.CPILEGNSsa, rawM.CPILEGSL]));
 disp('Cross-Correlations CPILEGNS, CPILEGNSsa, CPILEGSL, 1Q Growth Rates')
-R %#ok<NOPTS>
+disp(R)
+
 
 %% Convert Monthly and Daily Series to Quarterly
 %
@@ -109,14 +109,14 @@ rawQ.PCEP = rawQ.PCE/rawQ.PCEC96;
 
 disp('Combined quarterly, monthly and daily data')
 disp('(converted all to quarterly)')
-rawQ %#ok<NOPTS>
+disp(rawQ)
 
-% ...
+%%%
 %
-% The six conversion lines above can be replaced with the following single
-% batch command:
+% The first eight conversion lines above can be replaced with the following
+% single batch command:
 %
-%    Raw4 = dbbatch(Raw,'$0','convert(Raw12.$0,"quarterly")');
+%    rawQ = dbbatch(rawM, '$0', 'convert(rawM.$0, 4)');
 
 
 %% Create Model Consistent Variable Names                                  
@@ -141,96 +141,51 @@ endHist = get(d.Growth, 'End');
 disp('Historical range')
 (startHist:endHist)' %#ok<NOPTS>
 
-%% Run Plain and Conditional HP Filters                                    
+
+%% Run Plain HP Filters
 %
-% Illustrate the use of a plain and a conditional HP filter (an HP filter
-% with constraints on the level of the trend or change in the trend at some
-% dates), and plot the trends against the data. The trends are calculated
-% for this example only, and are not needed otherwise.
-%
-% For each variable below, run two versions of the |hpf( )| function:
-%
-% # Plain HP with the default $\lambda$ for quarterly series $\lambda =
+% Run plain HP with the default $\lambda$ for quarterly series $\lambda =
 % 1,600$.
-% # Conditional HP with a more rigid trend by setting, $\lambda = 5,000$,
+%
+
+d.Infl_tnd   = hpf(d.Infl);
+d.Wage_tnd   = hpf(d.Wage); 
+d.Short_tnd  = hpf(d.Short);
+d.Long_tnd   = hpf(d.Long); 
+d.Growth_tnd = hpf(d.Growth); 
+d.Asset_tnd  = hpf(d.Asset); 
+
+
+%% Run Conditional HP Filters
+%
+% Illustrate the use of a conditional HP filter, i.e. an HP filter with
+% constraints on the level of the trend or change in the trend at some
+% dates. Run the HP with a more rigid trend by setting, $\lambda = 5,000$,
 % and constraints on the level of the trend or the change in the trend
 % (depending on the variable) by setting the option |Level=| or |Change=|,
-% respectively.
-
-%%% 
-%
-% *Inflation*
+% respectively:
 %
 
-% Plain HP
-d.Infl_tnd = hpf(d.Infl);
-
-% Conditional HP
 x = Series( );
 x(endHist) = 2.5;
 d.Infl_tnd2 = hpf(d.Infl, Inf, 'Lambda=', 5000, 'Level=', x); 
 
-%%%
-%
-% *Wage inflation*
-%
-
-% Plain HP
-d.Wage_tnd = hpf(d.Wage); 
-
-% Conditional HP
 x = Series( );
 x(endHist) = 0;
 d.Wage_tnd2 = hpf(d.Wage, Inf, 'Lambda=', 5000, 'Change=', x);
 
-%%%
-%
-% *Short Interest Rates*
-%
-
-% Plain HP
-d.Short_tnd = hpf(d.Short); 
-
-% Conditional HP
 x = Series( );
 x(endHist) = 0;
 d.Short_tnd2 = hpf(d.Short, Inf, 'Lambda=', 5000, 'Change=', x); 
 
-%%%
-%
-% *Long Interest Rates*
-%
-
-% Plain HP
-d.Long_tnd = hpf(d.Long); 
-
-% Conditional HP
 x = Series( );
 x(endHist) = 0;
 d.Long_tnd2 = hpf(d.Long, Inf, 'Lambda=', 5000, 'Change=', x); 
 
-%%%
-%
-% *GDP Growth*
-%
-
-% Plain HP
-d.Growth_tnd = hpf(d.Growth); 
-
-% Conditional HP
 x = Series( );
 x(endHist) = 2;
 d.Growth_tnd2 = hpf(d.Growth, Inf, 'Lambda=', 5000, 'Level=', x); 
 
-%%%
-%
-% *Asset Price Change*
-%
-
-% Plain HP
-d.Asset_tnd = hpf(d.Asset); 
-
-% Conditional HP
 x = Series( );
 x(endHist) = 0;
 d.Asset_tnd2 = hpf(d.Asset, Inf, 'Lambda=', 5000, 'Change=', x); 
@@ -238,19 +193,20 @@ d.Asset_tnd2 = hpf(d.Asset, Inf, 'Lambda=', 5000, 'Change=', x);
 disp(d)
 
 
-%% Plot Data
+%% Plot HP Trends against Data
 %
 % The function |dbplot( )| creates graphs based on the list supplied as the
 % third input argument.
+%
 
 dbplot(d, Inf, ...
 	{ ...
-    ' "Consumer Deflator Inflation, 1Q ROC PA" [Infl,Infl_tnd,Infl_tnd2]', ...
-    ' "Wage Inflation, 1Q ROC PA" [Wage,Wage_tnd,Wage_tnd2]', ...
-    ' "3-Month Treasury Bill Rate, PA" [Short,Short_tnd,Short_tnd2]', ...
-    ' "5-Year Treasury Const Maturity Rate, PA" [Long,Long_tnd,Long_tnd2]', ...
-    ' "Consumption Growth, 1Q ROC PA" [Growth,Growth_tnd,Growth_tnd2]', ...
-    ' "Asset Price Change, 1Q ROC PA" [Asset,Asset_tnd,Asset_tnd2]', ...
+    ' "Consumer Deflator Inflation, 1Q ROC PA" [Infl,Infl_tnd,Infl_tnd2] ', ...
+    ' "Wage Inflation, 1Q ROC PA" [Wage,Wage_tnd,Wage_tnd2] ', ...
+    ' "3-Month Treasury Bill Rate, PA" [Short,Short_tnd,Short_tnd2] ', ...
+    ' "5-Year Treasury Const Maturity Rate, PA" [Long,Long_tnd,Long_tnd2] ', ...
+    ' "Consumption Growth, 1Q ROC PA" [Growth,Growth_tnd,Growth_tnd2] ', ...
+    ' "Asset Price Change, 1Q ROC PA" [Asset,Asset_tnd,Asset_tnd2] ', ...
     }, ...
     'Tight=', true);
 
@@ -265,7 +221,20 @@ grfun.ftitle('U.S. Data for SPBC Tutorial');
 save mat/read_data.mat d startHist endHist
 
 
-%% Show Variables and Objects Created in This File                         
+%% Show Variables and Objects Created in This File
 
 whos
 
+
+%% Get Help on IRIS Functions Used This File
+%
+%     help dbase/dbloase
+%     help dbase/dbplot
+%     help grfun/bottomlegend
+%     help grfun/ftitle
+%     help Series/apct
+%     help Series/pct
+%     help Series/convert
+%     help Series/hpf
+%     help Series/get
+%

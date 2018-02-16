@@ -1,23 +1,25 @@
-%% Simple SPBC Model                                                       
+%% IRIS Tutorial: Simple SPBC Model                                        
 %
-% This tutorial builds a simple sticky-price business-cycle model (SPBC),
-% and runs a number of basic and more advanced experiments to illustrate
-% typical tasks in practical model development and operation.
+% In this tutorial, we build a simple sticky-price business-cycle model
+% (SPBC), and run a number of basic and more advanced experiments to
+% illustrate typical tasks in practical model development and operation.
+% The experiments include, for instance, steady-state comparative statics,
+% dynamic simulations, estimation, filtering of historical data, and
+% forecasting.
 %
-% Runs in IRIS Release 20180131.
+% Runs in IRIS Release 20180131 or later
 %
 %
 %% Model Files                                                             
 %
-% Open and inspect the model file:
+% Model files can be opened and edited in the Matlab editor (or any other
+% plain text editor), but are not run themselves. They are read from
+% within Matlab programs (m-files).
 %
-%   simple_SPBC.model
-%
-% Model files are not to be run themselves; they are read in from within
-% other m-files.
+%   simple_SPBC.model             - Simple SPBC Model File
 %
 %
-%% M-Files (Matlab Programs)                                               
+%% Matlab Programs (M-Files)                                               
 %
 % Open and run the m-files in the following order:
 %
@@ -40,7 +42,7 @@
 %   compare_model_and_data        - Compare Second Moment Properties in Model and Data
 %
 %
-%% Data Files                                                              
+%% CSV Data Files                                                          
 %
 % The following CSV data files are read in from within other m-files:
 %
@@ -48,28 +50,6 @@
 %   simple_SPBC_monthly.csv
 %   simple_SPBC_daily.csv
 %
-
+%
 % Copyright (c) 2007-2018 IRIS Solutions Team
-
-%{
-delete('html-source/*');
-publish.model('simple_SPBC.model');
-publish.mfile('read_model.m');
-publish.mfile('get_info_about_model.m');
-publish.mfile('change_parameters_and_sstates.m');
-publish.mfile('know_all_about_solution.m');
-publish.mfile('play_with_bgp.m');
-publish.mfile('simulate_simple_shock.m');
-publish.mfile('simulate_complex_shocks.m');
-publish.mfile('simulate_disinflation.m');
-publish.mfile('resample_from_model.m');
-publish.mfile('read_data.m');
-publish.mfile('fisher_information_matrix.m');
-publish.mfile('estimate_params.m');
-publish.mfile('more_on_poster_simulator.m');
-publish.mfile('filter_hist_data.m');
-publish.mfile('more_on_kalman_filter.m');
-publish.mfile('forecasts_with_judgment.m');
-publish.mfile('compare_model_and_data.m');
-%}
-
+%
