@@ -22,10 +22,8 @@
 % Clear workspace, close all graphics figures, clear command window, and
 % check the IRIS version.
 
-clear
 close all
-clc
-irisrequired 20180131
+clear
 
 
 %% Load Posterior Simulator Object

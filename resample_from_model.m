@@ -94,8 +94,7 @@ d = resample(m, [ ], startDate:endDate, N, J, 'Progress=', true);
 % Also, remember to set |Anticipate=false| because |resample( )| produces
 % unanticipated shocks.
 
-d1 = simulate(m, d, startDate:endDate, ...
-    'Anticipate=', false, 'Progress=', true);
+d1 = simulate(m, d, startDate:endDate, 'Anticipate=', false, 'Progress=', true);
 
 maxabs(d, d1)
 

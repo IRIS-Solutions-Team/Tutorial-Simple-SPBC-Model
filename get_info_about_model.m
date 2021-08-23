@@ -13,14 +13,17 @@
 % Clear workspace, close all graphics figures, clear command window, and
 % check the IRIS version.
 
-clear close all clc irisrequired 20180131
+close all 
+clear
+clc 
+irisrequired 20180131
 %#ok<*NOPTS>
 
 %% Load Solved Model Object
 %
 % Load the model object created in <read_model.html read_model>.
 
-load mat/read_model.mat m;
+load mat/read_model.mat m
 
 %% Names of Variables, Shocks and Parameters
 
@@ -55,8 +58,8 @@ get(m, 'yEqtn')
 disp('Transition equation labels')
 get(m, 'XLabels')
 
-disp('Find equation labeled ''Production function''')
-findeqtn(m, 'Production function')
+disp('Find equation labeled ''Production Function''')
+findeqtn(m, 'Production Function')
 
 disp('Equations whose labels start with P')
 findeqtn(m, rexp('P.*'))
@@ -169,49 +172,42 @@ get(m, 'Required')
 format short e
 
 disp('Model Eigenvalues (Roots)');
-allRoots = get(m, 'Roots');
-table(allRoots.', abs(allRoots).', ...
-    'VariableNames', {'All_Roots', 'Magnitudes'});
-
-stableRoots = get(m, 'StableRoots');
-unitRoots = get(m, 'UnitRoots');
-unstableRoots = get(m, 'UnstableRoots');
+allRoots = table(m, 'AllRoots')
 
 % Stable roots
-table(stableRoots.', abs(stableRoots).', ...
-    'VariableNames', {'Stable_Roots', 'Magnitudes'})
+stableRootsTable = table(m, 'StableRoots')
 
 % Unit roots
-table(unitRoots.', abs(unitRoots).', ...
-    'VariableNames', {'Unit_Roots', 'Magnitudes'})
+unitRootsTable = table(m, 'UnitRoots')
 
 % Unstable roots
-table(unstableRoots.', abs(unstableRoots).', ...
-    'VariableNames', {'Unstable_Roots', 'Magnitudes'})
+unstableRootsTable = table(m, 'UnstableRoots')
 
 format
 
 %% Plot Stable Roots Against Unit Circle                                   
 
 figure( )
-ploteig(stableRoots);
+ploteig(stableRootsTable{:, 1});
 title('Stable Roots');
 
-[~, pos] = sort(abs(stableRoots), 'descend');
-stableRoots = stableRoots(pos);
-[~, pos] = sort(abs(unstableRoots), 'ascend');
-unstableRoots = unstableRoots(pos);
+[~, pos] = sort(stableRootsTable{:, 2}, 'descend');
+stableRootsSortedTable = stableRootsTable(pos, :);
+
+[~, pos] = sort(unstableRootsTable{:, 2}, 'ascend');
+unstableRootsSortedTable = unstableRootsTable(pos, :);
 
 
 %% Show Most Influential Roots                                             
 %
 % Show the roots that are the most influential for the model dynamics: the
-% largest stable root and the smallest unstable root (print its inverse).
+% largest stable root and the smallest unstable root.
 
-disp('Largest stable root')
-stableRoots(1)
-disp('Smallest unstable root and its inverse')
-[unstableRoots(1), 1./unstableRoots(1)]
+disp('Magnitude of the largest stable root')
+stableRootsSortedTable{1, 2}
+
+disp('Magnitude of smallest unstable root and its inverse')
+[unstableRootsSortedTable{1, 2}, 1./unstableRootsSortedTable{1, 2}]
 
 
 %% Show Variables and Objects Created in This File                         

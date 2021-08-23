@@ -8,9 +8,9 @@
 %
 % Run the following m-files before this one:
 %
-% * <read_data.html |read_data|>
-% * <estimate_params.html |estimate_params|>
-% * <filter_hist_data.html |filter_hist_data|>
+% * <read_data.html `read_data`>
+% * <estimate_params.html `estimate_params`>
+% * <filter_hist_data.html `filter_hist_data`>
 %
 
 
@@ -22,18 +22,18 @@
 clear
 close all
 clc
-irisrequired 20180131
 
 
 %% Load Estimated Model Object, Filtered Data, and Historical Database
 %
-% Load the model object estimated in |estimate_params|, the filtered
-% (smoothed) data from a Kalman filter in |filter_hist_data|, and the
-% historical database created in |read_data|. 
+% Load the model object estimated in `estimate_params`, the filtered
+% (smoothed) data from a Kalman filter in `filter_hist_data`, and the
+% historical database created in `read_data`. 
 
 load mat/estimate_params.mat mest
-load mat/filter_hist_data.mat f
+load mat/filter_hist_data.mat f0
 load mat/read_data.mat d startHist endHist
+f = f0;
 
 
 %% Define Dates
@@ -46,8 +46,8 @@ highRng = startPlot:endHist;
 
 %% Define Graphics Styles
 %
-% The structs |sty1| and |sty2| are used in the option |Style=| in
-% |dbplot( )| to automatically style the graphs plotted.
+% The structs `sty1` and `sty2` are used in the option `Style=` in
+% `dbplot( )` to automatically style the graphs plotted.
 
 sty1 = struct( );
 sty1.Line.Color = @first;
@@ -68,12 +68,13 @@ sty2.Legend.FontSize = 7;
 %% Run Unconditional Forecast
 %
 % Unconditional forecast runs from the initial condition supplied in the
-% input database, |f|. The initial conditions consist of the mean and the
+% input database, `f`. The initial conditions consist of the mean and the
 % root mean square error (initial uncertainty) for each variable. Directly
 % observed variables have obviously RMSE zero, the unobservables (such as
 % productivity) have non-zero initial uncertainty.
 
 u = jforecast(mest, f, startFcst:endFcst);
+uu = simulate(mest, f.mean, startFcst:endFcst);
 
 u %#ok<NOPTS>
 u.mean
@@ -81,11 +82,14 @@ u.mean
 u.mean = dboverlay(f.mean, u.mean);
 u.std = dboverlay(f.std, u.std);
 
+% maxabs(u.mean, uu)
+
 %% Create Plot Lists
 %
-% Define variables and titles to appear in graphs created by |dbplot( )|
+% Define variables and titles to appear in graphs created by `dbplot( )`
 % functions after each forecast experiment.
 
+%{
 plotList1 = { ...
     ' "Short Rate, PA" [mean.Short, mean.Short+std.Short, mean.Short-std.Short]', ...
     ' "Inflation, Q/Q PA" [mean.Infl, mean.Infl+std.Infl, mean.Infl-std.Infl]', ...
@@ -101,6 +105,9 @@ plotList2 = { ...
     ' "Wage Shocks" mean.Ew', ...
     };
 
+%}
+
+%{
 %% Report Unconditional Forecast
 
 dbplot(u, startPlot:endFcst, plotList1, ...
@@ -112,6 +119,7 @@ dbplot(u, startPlot:endFcst, plotList2, ...
     'Tight=', true, 'Style=', sty1, 'Highlight=', highRng, ...
     'Transform=', @(x) 100*x);
 grfun.ftitle('Unconditional Forecasts');
+%}
 
 %% Exogenise Interest Rates
 %
@@ -125,17 +133,24 @@ grfun.ftitle('Unconditional Forecasts');
 % The forecast with exogenised interest rates is run in an anticipated
 % mode.
 
+%{
 sc1 = plan(mest, startFcst:endFcst);
 sc1 = exogenize(sc1, 'Short', startFcst:startFcst+3);
 sc1 = endogenize(sc1, 'Er', startFcst:startFcst+3);
+%}
+
+p1 = Plan(mest, startFcst:endFcst);
+p1 = exogenize(p1, startFcst+(0:3), 'Short');
+p1 = endogenize(p1, startFcst+(0:3), 'Er');
 
 f1 = f;
 f1.mean.Short(startFcst:startFcst+3, 1) = f.mean.Short(endHist);
+f1.mean.R(startFcst:startFcst+3, 1) = f.mean.R(endHist);
 
-detail(sc1, f1);
+jj1 = simulate(mest, f1.mean, startFcst:endFcst, 'Plan=', p1);
+return
 
-j1 = jforecast(mest, f1, startFcst:endFcst, 'Plan=', sc1);
-
+%{
 %% Compare Exogenised Forecasts with Unconditional Forecasts
 
 dbplot(u & j1, startPlot:endFcst, plotList1, ...
@@ -148,6 +163,8 @@ dbplot(u & j1, startPlot:endFcst, plotList2, ...
     'Tight=', true, 'Style=', sty2, 'Highlight=', highRng, ...
     'Transform=', @(x) 100*x);
 grfun.ftitle('Unconditional vs Exogenized Short Rate');
+%}
+
 
 %% Condition on Anticipated Interest Rates
 %
@@ -174,10 +191,17 @@ c.Short = f2.mean.Short;
 
 detail(sc2, f2);
 
-j2 = jforecast(mest1, f2, startFcst:endFcst, c, 'Plan=', sc2);
+j2 = jforecast(mest1, f2, startFcst:endFcst, 'Plan=', sc2, 'InitCond', 'fixed');
+
+p2 = Plan(mest, startFcst:endFcst);
+p2 = exogenize(p2, startFcst+(0:3), 'Short');
+p2 = endogenize(p2, startFcst+(0:3), {'Ey', 'Ep', 'Ea', 'Ew'});
+
+jj2 = simulate(mest1, f2.mean, startFcst:endFcst, 'Plan=', p2);
 
 %% Compare Anticipated Conditional Forecasts with Unconditional Forecasts
 
+%{
 dbplot(u & j2, startPlot:endFcst, plotList1, ...
     'Tight=', true, 'Style=', sty2, 'Highlight=', highRng);
 grfun.ftitle('Unconditional vs Conditional on Anticipated Short Rate');
@@ -188,6 +212,7 @@ dbplot(u & j2, startPlot:endFcst, plotList2, ...
     'Tight=', true, 'Style=', sty2, 'Highlight=', highRng, ...
     'Transform=', @(x) 100*x);
 grfun.ftitle('Unconditional vs Conditional on Anticipated Short Rate');
+%}
 
 %% Condition on Unanticipated Interest Rates
 %
@@ -196,13 +221,40 @@ grfun.ftitle('Unconditional vs Conditional on Anticipated Short Rate');
 
 sc3 = sc2;
 f3 = f2;
+f3.mean.Short(startFcst+(0:3)) = f3.mean.Short(endHist);
+anticipate = ~true;
 
-j3 = jforecast(mest1, f3, startFcst:endFcst+50, ...
-    'Plan=', sc3, 'anticipate=', false);
+j3 = jforecast( mest1, f3, startFcst:endFcst+50, ...
+                'Plan=', sc3, 'anticipate=', anticipate, 'InitCond=', 'fixed' );
+
+p3 = Plan(mest, startFcst:endFcst, 'Method=', 'Condition', 'Anticipate=', anticipate);
+p3 = exogenize(p3, startFcst+(0:3), 'Short');
+p3 = endogenize(p3, startFcst+(0:3), {'Ey', 'Ep', 'Ea', 'Ew'});
+jj3 = simulate(mest1, f3.mean, startFcst:endFcst, 'Plan=', p3);
+chk3 = simulate(mest1, jj3, startFcst:endFcst, 'Anticipate=', anticipate);
+
+[~, k3] = filter(mest1, [ ], startFcst:endFcst, ...
+    'InitCond=', jj3, ...
+    'Override=', jj3, ...
+    'Anticipate=', anticipate ...
+);
+
+temp = struct( );
+temp.Short = Series( );
+temp.Short(startFcst+(0:3)) = f3.mean.Short;
+[~, k33] = filter(mest1, temp, startFcst:endFcst, ...
+    'InitCond=', jj3, ...
+    'Override=', jj3, ...
+    'Relative=', false, ...
+    'Anticipate=', anticipate ...
+);
+return
 
 %% Compare Unanticipated Conditional Forecasts with Uncondtional Forecasts
 
-dbplot(u & j3, startPlot:endFcst, plotList1, ...
+%{
+temp = struct('mean', jj3);
+dbplot(u & j3 & temp, startPlot:endFcst, plotList3, ...
     'Tight=', true, 'Style=', sty2, 'Highlight=', highRng);
 grfun.ftitle('Unconditional vs Conditional on Unanticipated Short Rate');
 grfun.bottomlegend('Uncond Mean', 'Cond Mean', ...
@@ -212,6 +264,7 @@ dbplot(u & j3, startPlot:endFcst, plotList2, ...
     'Tight=', true, 'Style=', sty2, 'Highlight=', highRng, ...
     'Transform=', @(x) 100*x);
 grfun.ftitle('Unconditional vs Conditional on Unanticipated Short Rate');
+%}
 
 
 %% Exogenised Interest Rates and Condition on Inflation
@@ -230,6 +283,7 @@ f4.mean.Short(startFcst:startFcst+3) = f4.mean.Short(endHist);
 f4.mean.Infl(startFcst:startFcst+3) = f4.mean.Infl(endHist);
 
 j4 = jforecast(mest1, f4, startFcst:endFcst+50, 'Plan=', sc4);
+jj4 = simulate(mest1, f4, startFcst:endFcst+50, 'Plan=', sc4);
 
 %% Verify Exogenised and Conditioned Data Points
 %
@@ -261,10 +315,10 @@ grfun.ftitle(['Unconditional vs ', ...
 
 %% Resimulate Point Forecasts
 %
-% The function |simulate( )| only uses the input database for initial
-% condition and in-sample shocks. The shocks backed out by |jforecast( )|
+% The function `simulate( )` only uses the input database for initial
+% condition and in-sample shocks. The shocks backed out by `jforecast( )`
 % are such that they exactly reproduce the exogenised and/or conditioned
-% data points.  The function |maxabs( )| reports the max abs differences
+% data points.  The function `maxabs( )` reports the max abs differences
 % between the fields of the same name in two structs (databases).
 
 s1 = simulate(mest1, j1.mean, startFcst:endFcst); 

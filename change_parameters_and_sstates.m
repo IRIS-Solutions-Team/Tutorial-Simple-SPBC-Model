@@ -10,10 +10,9 @@
 % Clear workspace, close all graphics figures, clear command window, and
 % check the IRIS version.
 
-clear
 close all
-clc
-irisrequired 20180131
+clear
+
 %#ok<*NOPTS>
 %#ok<*NASGU>
 
@@ -24,7 +23,7 @@ irisrequired 20180131
 % dot-reference, i.e. the name of the model object dot the name of the
 % parameter.
 
-m = model('simple_SPBC.model');
+m = Model('simple_SPBC.model');
 
 m.alpha = 1.03^(1/4);
 m.beta = 0.985^(1/4);
@@ -51,12 +50,15 @@ m.std_Mp = 0;
 m.std_Mw = 0;
 m.std_Ea = 0.1/100;
 
+table(m, 'parameters')
+
 %% Assign Parameter Database When Reading Model File
 %
-% Create first a database with the desired parameter values 
-% (or use an existing one, for example), and assign the database when
-% reading the model file, i.e. when calling the function |model( )|,
-% by using the option |Assign=|.
+% Create first a database with the desired parameter values (or
+% use an existing one, for example), and assign the database when
+% reading the model file, i.e. when calling the Model object
+% constructor functionk `Model( )`, by using the option
+% `Assign=`.
 
 P = struct( );
 
@@ -85,8 +87,9 @@ P.std_Mp = 0;
 P.std_Mw = 0;
 P.std_Ea = 0.1/100;
 
-m = model('simple_SPBC.model', ...
-    'assign=', P); 
+m = Model('simple_SPBC.model', 'Assign=', P); 
+
+table(m, 'parameters')
 
 %% Assign Parameter Database After Reading Model File
 %
@@ -120,9 +123,11 @@ P.std_Mp = 0;
 P.std_Mw = 0;
 P.std_Ea = 0.1/100;
 
-m = model('simple_SPBC.model');
+m = Model('simple_SPBC.model');
 
 m = assign(m, P); 
+
+table(m, 'parameters')
 
 %% Change Parameters in Model Object
 %

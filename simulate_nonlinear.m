@@ -1,0 +1,46 @@
+
+
+close all
+clear
+
+load mat/read_model.mat m
+
+d = steadydb(m, 1:20);
+d.Ey(1:2) = -0.05;
+d.Ep(1:3) = -0.05;
+
+
+%{
+s0 = simulate(m, d, 1:20);
+s1 = simulate(m, d, 1:20, "method", "stacked", "blocks", true, "solver", {"iris-newton", "skipJacobUpdate", 2});
+s2 = simulate(m, d, 1:20, "method", "stacked", "blocks", false, "solver", {"iris-newton", "skipJacobUpdate", 2});
+%}
+
+
+%% Stacked Time Simulations with First-Order Terminal Condition
+
+p = Plan.forModel(m, 1:20, "Anticipate", false);
+
+s3 = simulate( ...
+    m, d, 1:20 ...
+    , "Method=", "Stacked" ...
+    , "Blocks=", false ...
+    , "Terminal=", "FirstOrder" ...
+    , "Initial=", "FirstOrder" ...
+    , "Plan=", p ...
+    , "Solver=", {"Iris-Newton", "SkipJacobUpdate=", 2, "FunctionNorm=", Inf} ...
+);
+
+return
+
+%% Period-by-Period Simulations with Fixed-Data Terminal Condition
+
+s4 = simulate( ...
+    m, d, 1:20 ...
+    , "Method", "Period" ...
+    , "Blocks", false ...
+    , "Terminal", "Data" ...
+    , "Solver=", {"Iris-Newton", "SkipJacobUpdate=", 2} ...
+);
+
+

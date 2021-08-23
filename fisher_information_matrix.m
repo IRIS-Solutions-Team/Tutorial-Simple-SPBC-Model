@@ -70,7 +70,7 @@ fprintf('Resample %g times from calibrated model.\n', numDraws);
 
 % Simulate a total of numDraws artificial data, length 40 periods.
 d = resample(m, [ ], 1:40, numDraws, 'deviation=', false);
-d = rmfield(d, 'Wage');
+d = rmfield(d, {'Wage', 'Long'});
 
 disp('Compute Hessians for each draw and average them')
 
@@ -81,7 +81,7 @@ F1 = mean(F1, 3);
 
 disp('Compute information matrix in frequency domain')
 [F2, F2i, d] = fisher(m, 40, plist, ...
-    'deviation=', false, 'exclude=', {'Wage'}, 'progress=', true);
+    'deviation=', false, 'exclude=', {'Wage', 'Long'}, 'progress=', true);
 
 format shortEng;
 disp('Compare time-domain and frequency domain info matrices')

@@ -12,13 +12,14 @@
 clear
 close all
 clc
+irisrequired 20180131
 %#ok<*NASGU>
 %#ok<*NOPTS>
  
 %% Load Solved Model Object
 %
 % Load the solved model object built in <read_model.html read_model>. Run
-% `read_model` at least once before running this m-file.
+% |read_model| at least once before running this m-file.
 
 load mat/read_model.mat m
 
@@ -36,7 +37,7 @@ plotRng = startDate-5 : startDate+19;
 
 m1 = m;
 m1.pi = 1.035^(1/4);
-m1 = steady(m1, ...
+m1 = sstate(m1, ...
     'Solver=', 'IRIS', ...
     'Fix=', {'Y', 'N', 'A', 'RMC', 'Growth'}, 'Growth=', true);
 chksstate(m1, 'Equations=', 'Steady');
@@ -50,10 +51,10 @@ ss & ss1
 
 %% Simulate Disinflation
 %
-% Simulate the low-inflation model, `m`, starting from the steady state of
-% the high-inflation model, `m1`.
+% Simulate the low-inflation model, |m|, starting from the steady state of
+% the high-inflation model, |m1|.
 
-d1 = steadydb(m1, startDate-3:endDate+100);
+d1 = sstatedb(m1, startDate-3:endDate+100);
 s = simulate(m, d1, startDate:endDate, 'AppendPresample=', true);
 s = dbminuscontrol(m, s, d1);
 
@@ -64,15 +65,11 @@ plotList = { ...
     ' "Hours Worked [Pct Level Dev]" N ', ...
     ' "Real Wage [Pct Level Dev]" W/P ', ...
     ' "Capital Price [Pct Level Dev]" Pk', ...
-};
-
-dbplot( ...
-    s, plotRng, plotList, ...
+   };
+dbplot(s, plotRng, plotList, ...
    'Tight=', true, 'Highlight=', startDate-5:startDate-1, ...
-   'Transform=', @(x) 100*(x-1) ...
-);
-
-visual.heading('Disinflation');
+   'Transform=', @(x) 100*(x-1));
+grfun.ftitle('Disinflation');
 
 %% Sacrifice Ratio
 %
@@ -80,36 +77,46 @@ visual.heading('Disinflation');
 % Divide by 4 to get an annualised figure (reported in the literature).
 
 sacRat = -cumsum(100*(s.Y-1))/4
+mhigh = m1;
+mlow = m;
+startDate = qq(2018,1);
+endDate = startDate + 20;
 
-%% Change Price and Wage Stickiness and Compare to Baseline
+
+
+
+
+%% Change Sacrifice Ratios for Different Price Stickiness
 %
-% Create a model object with 8 parameterisations, and assign a range of
-% values to the price stickiness parameter.
+% Create a model object with eight parameter variangs, and assign a range of
+% values to the price stickiness parameter. Run a disinflation simulation
+% for all variants, and compare the sacrifice ratio.
 
-m = alter(m, 8);
-m.xip = [60, 80, 100, 120, 140, 160, 180, 200];
-m = solve(m);
-display(m);
+% Create eight parameter variants
+mlow = alter(mlow, 8);
+mlow.xip = [60, 80, 100, 120, 140, 160, 180, 200];
+mlow = solve(mlow);
 
-s = simulate(m, d1, startDate:endDate, 'AppendPresample=', true);
-s = dbminuscontrol(m, s, d1);
+% Simulate all parameter variants at once
+dhigh = sstatedb(mhigh, startDate:endDate);
+s = simulate(mlow, dhigh, startDate:endDate, 'AppendPresample=', true);
 
-dbplot(s, plotRng, plotList, 'Tight=', true, 'Transform=', @(x) 100*(x-1));
-visual.heading('Disinflation with More Flexible Prices');
-
-disp('Cumulative output gap (sacrifice ratio):');
-sacRat = -cumsum(100*(s.Y-1))/4;
+% Calculate and plot sacrifice ratios for all price stickiness parameter values
+sacrificeRatio = -cumsum(100*(s.Y/dhigh.Y - 1))/4;
 
 figure( );
-plot(sacRat);
-grid('on');
+plot(sacrificeRatio, 'lineWidth', 2);
+grid on
 title('Sacrifice ratio');
-legend( ...
-    '\xi_p=60', '\xi_p=80', '\xi_p=100', '\xi_p=120', ...
-   '\xi_p=140', '\xi_p=160', '\xi_p=180', '\xi_p=200', ...
-   'location', 'northWest' ...
-);
-sacRat{startDate:endDate}
+legendEntries = arrayfun(@(x) sprintf('\\xi_p=%g', x), mlow.xip, 'UniformOutput', false);
+h = legend(legendEntries{:});
+h.NumColumns = 2;
+h.Location = 'SouthEast';
+
+
+
+set(gca, 'fontsize', 14)
+
 
 
 %% Show Variables and Objects Created in This File                         

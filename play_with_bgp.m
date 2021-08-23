@@ -44,17 +44,17 @@ load mat/read_model.mat m
 
 m1 = m;
 m1.A = 2;
-m1 = sstate(m1, ...
+[m1, ~, info] = steady(m1, ...
     'Growth=', true, 'Blocks=', false, 'FixLevel=', 'A', ...
     'Solver=', 'IRIS'); 
-chksstate(m1);
+checkSteady(m1);
 
 m2 = m;
 m2.A = 4;
-m2 = sstate(m2, ...
+m2 = steady(m2, ...
     'Growth=', true, 'Blocks=', false, 'FixLevel=', 'A', ...
     'Solver=', 'IRIS'); 
-chksstate(m2); 
+checkSteady(m2); 
 
 disp('Productivity level and gross rate of growth')
 a1 = m1.A;
@@ -107,4 +107,4 @@ maxabs(s1, s2)
 
 %% Show Variables and Objects Created in This File                         
 
-whos
+% whos

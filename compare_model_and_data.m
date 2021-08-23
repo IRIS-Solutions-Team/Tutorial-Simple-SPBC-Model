@@ -10,8 +10,8 @@
 %
 % Run the following m-files before this one:
 %
-% * <read_data.html |read_data|>
-% * <estimate_params.html |estimate_params|>
+% * <read_data.html `read_data`>
+% * <estimate_params.html `estimate_params`>
 %
 
 
@@ -23,13 +23,12 @@
 clear
 close all
 clc
-irisrequired 20180131
 
 
 %% Load Estimated Model Object, and Historical Database
 %
-% Load the model object estimated in |estimate_params|, and the historical
-% database created in |read_data|. 
+% Load the model object estimated in `estimate_params`, and the historical
+% database created in `read_data`. 
 
 load mat/estimate_params.mat mest
 load mat/read_data.mat d startHist endHist
@@ -41,25 +40,31 @@ load mat/read_data.mat d startHist endHist
 % Litterman-type priors. First, create an empty VAR object specifying the
 % names of the endogenous variables. The names are identical to the names
 % of measurement variables in the DSGE model.  Second, call the function
-% |estimate( )| with an input database. For bayesian VARs, create prior
-% dummy observations before running |estimate( )|.
+% `estimate( )` with an input database. For bayesian VARs, create prior
+% dummy observations before running `estimate( )`.
 
 ylist = get(mest, 'YList'); %(#ylist)
 
 p = 2;
 
-v = VAR(ylist) %#ok<NOPTS> %(#emptyvar)
-[v, vdata] = estimate(v, d, startHist:endHist, 'Order=', p);
-v %#ok<NOPTS>
+v = VAR(ylist, 'Order=', p) %#ok<NOPTS> %(#emptyvar)
+[v, vdata] = estimate(v, d, startHist:endHist);
+v
 
 X = BVAR.litterman(0, sqrt(30), 0) %#ok<NOPTS> %(#priordummy)
 
-bv = VAR(ylist) %#ok<NOPTS>
-[bv, bvdata] = estimate(bv, d, startHist:endHist, 'Order=', p, ...
-    'BVAR=', X, 'Stdize=', true);
-bv %#ok<NOPTS>
+bv = VAR(ylist, 'Order=', p) %#ok<NOPTS>
+[bv, bvdata] = estimate( ...
+    bv, d, startHist:endHist ...
+    , 'BVAR=', X ...
+    , 'Stdize=', true ...
+);
+
+bv
 
 
+
+%{
 %% Compare Transition Matrices
 %
 % Get and print the transition matrices from the plain VAR and the BVAR
@@ -80,9 +85,9 @@ BA(:, :, 2)
 %% Compare Residuals
 %
 % Plot and compare the estimated residuals from the plain VAR and the BVAR.
-% Use the output data, |vdata| and |bvdata| returned from |estimate( )|.
+% Use the output data, `vdata` and `bvdata` returned from `estimate( )`.
 % These databases containing both the endogenous variables and estimated
-% residuals. By default, the residuals are named |res_XXX| where |XXX| is
+% residuals. By default, the residuals are named `res_XXX` where `XXX` is
 % the name of the respective variable, 
 
 elist = get(v, 'EList');
@@ -98,54 +103,57 @@ for i = 1 : 4
     grid on;
     axis tight;
 end
-grfun.bottomlegend('Unrestricted VAR(2)', 'BVAR(2)');
+visual.hlegend('Bottom', 'Unrestricted VAR(2)', 'BVAR(2)');
+%}
 
 
 %% Resample From Estimated VAR
 %
-% Use a wild bootstrap to generate |N=500| of VARs; a wild bootstrap is
+% Use a wild bootstrap to generate `N=500` of VARs; a wild bootstrap is
 % robust to potential heteroscedasticity of residuals. Note that some of
 % the resampled VAR parameterisations may be explosive, and remove them
 % from the VAR object.
 
 N = 1000;
-Y = resample(v, vdata, Inf, N, 'Wild=', true, 'Progress=', true);
+Y = resample(v, vdata, startHist+p:endHist, N, 'Wild=', true, 'Progress=', true);
 size(Y)
 
 Nv = VAR(ylist);
-Nv = estimate(Nv, Y, Inf, 'Order=', p);
+Nv = estimate(Nv, Y, startHist:endHist, 'Order=', p);
 
 inx = isstationary(Nv);
 sum(inx)
 Nv = Nv(inx);
 
+
 %% Compare ACF From Model and Data
 %
 % Compute and plot the autocovariance/autocorrelation functions (ACF) for
 % the estimated VAR, the resampled VARs, and the model. The function
-% |helper_plot_acf( )| is a helper function (for plotting ACFs) created for
+% `herePlotAcf( )` is a helper function (for plotting ACFs) created for
 % this exercise in this tutorial (it is not part of the IRIS toolbox).
 
 [Cv, Rv] = acf(v, 'Order=', 1);
 [CNv, RNv] = acf(Nv, 'Order=', 1);
 [Cm, Rm] = acf(mest, 'Order=', 1, 'Select=', ylist);
 
+numY = numel(ylist);
 figure( );
-for i = 1 : length(ylist)
-    for j = i : length(ylist)
-        subplot(4, 4, (i-1)*4+j);
-        helper_plot_acf(CNv(i, j, 1, :), Cv(i, j, 1), Cm(i, j, 1)); %(#helper_plot_acf)
+for i = 1 : numY
+    for j = i : numY
+        subplot(numY, numY, (i-1)*numY+j);
+        herePlotAcf(CNv(i, j, 1, :), Cv(i, j, 1), Cm(i, j, 1)); %(#herePlotAcf)
         title(sprintf('Cross-covariance %s x %s', ylist{i}, ylist{j}));
     end
 end
 
-grfun.bottomlegend( ...
-    'VAR: Bootstrap', 'VAR: Point Estimate', 'Model: Asymptotic');
-grfun.ftitle('Estimated Cross-covariances');
+visual.hlegend('Bottom', 'VAR: Bootstrap', 'VAR: Point Estimate', 'Model: Asymptotic');
+visual.heading('Estimated Cross-covariances');
+
 
 %% Compare Frequency Selective ACF
 %
-% Use the option |Filter=| to compute the ACF (both from the strucural
+% Use the option `Filter=` to compute the ACF (both from the strucural
 % model and the VAR) that corresponds to cyclical fluctuations with
 % periodicity between 4 and 40 quarters (1 to 10 years).
 
@@ -160,45 +168,55 @@ maxabs(Cv1+Cv2+Cv3 - Cv)
 [Cm1, Rm1] = acf(mest, 'Filter=', 'Per<=40 & per>4', 'Select=', ylist);
 
 figure( );
-for i = 1 : length(ylist)
-    for j = i : length(ylist)
-        subplot(4, 4, (i-1)*4+j);
-        helper_plot_acf(CNv1(i, j, 1, :), Cv(i, j, 1), Cm1(i, j, 1));
-        title(sprintf('Cross-cov %s x %s', ylist{i}, ylist{j}));
-    end
-end
+for i = 1 : numY
+    for j = i : numY
+        subplot(numY, numY, (i-1)*numY+j);
+        herePlotAcf(CNv1(i, j, 1, :), Cv(i, j, 1), Cm1(i, j, 1));
+        title(sprintf('Cross-cov %s x %s', ylist{i}, ylist{j})); 
+    end 
+end 
+visual.hlegend('Bottom', 'VAR: Bootstrap', 'VAR: Point Estimate', 'Model: Asymptotic');
+visual.heading('Estimated Cross-covariances for Periodicities Below 40 Qtrs');
 
-grfun.bottomlegend( ...
-    'VAR: Bootstrap', 'VAR: Point Estimate', 'Model: Asymptotic');
-grfun.ftitle( ...
-    'Estimated Cross-covariances for Periodicities Below 40 Qtrs');
 
 %% Compare VAR and Model Spectra
 %
 % Compute and plot the power spectra and spectral densities for the
-% estimated VAR and for the model. The function |helper_plot_xsf( )| is a
+% estimated VAR and for the model. The function `helper_plot_xsf( )` is a
 % helper function (for plotting the spectral densities) created for this
 % exercise in this tutorial (it is not part of the IRIS toolbox); it can be
 % opened and viewed in the Matlab editor.
 %
 
-freq = 0 : 0.05 : pi;
+freq = 0.05 : 0.05 : pi;
 [Pv, Sv] = xsf(v, freq);
 [Pm, Sm] = xsf(mest, freq, 'Select=', ylist);
 
 figure( );
 
 for i = 1 : length(ylist)
-    subplot(2, 2, i);
+    subplot(2, 3, i);
     helper_plot_xsf(freq, Sv(i, i, :), Sm(i, i, :));
     title(sprintf('Spect density %s', ylist{i}));
 end
 
-grfun.bottomlegend('VAR: Point Estimate', 'Model: Asymptotic');
-grfun.ftitle('Estimated Spectral Densities');
+visual.hlegend('Bottom', 'VAR: Point Estimate', 'Model: Asymptotic');
+visual.heading('Estimated Spectral Densities');
 
 
-%% Show Variables and Objects Created in This File                         
+%% Local Functions
 
-whos
+function herePlotAcf(xnv,xv,xm)
+    xm = xm(:);
+    xv = xv(:);
+    xnv = xnv(:);
+
+    [a,b] = hist(xnv,15);
+    bar(b,a,'barWidth',1,'faceColor',0.9*[1,1,1]);
+    hold('all');
+    height = max(a)*1.10;
+    stem(xv,height,'color','blue','lineWidth',2);
+    stem(xm,height,'color','red','lineWidth',2);
+    grid('on');
+end%
 
