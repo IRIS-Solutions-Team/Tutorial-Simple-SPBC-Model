@@ -1,16 +1,21 @@
 function plotAcf(xnv,xv,xm)
 
+xnv = double(xnv);
+xv = double(xv);
+xm = double(xm);
+
 xm = xm(:);
 xv = xv(:);
 xnv = xnv(:);
 
-[a,b] = hist(xnv,15);
-bar(b,a,"barWidth",1,"faceColor",0.9*[1,1,1]);
-hold all
+histogram(xnv);
+hold on
 
-height = max(a)*1.10;
-stem(xv,height,"color","blue","lineWidth",2);
-stem(xm,height,"color","red","lineWidth",2);
+co = get(gca(), "colorOrder");
+height = get(gca(), "yLim");
+height = height(2);
+stem(xv, height, "color", co(1, :), "lineWidth", 3);
+stem(xm, height, "color", co(2, :), "lineWidth", 3); 
 
 grid on
 

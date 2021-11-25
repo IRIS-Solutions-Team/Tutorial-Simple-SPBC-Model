@@ -133,7 +133,7 @@ for i = 1 : numY
     end
 end
 
-visual.hlegend("Bottom", "VAR: Bootstrap", "VAR: Point Estimate", "Model: Asymptotic");
+visual.hlegend("Bottom", "Model: Asymptotic", "VAR: Bootstrap", "VAR: Point Estimate");;
 visual.heading("Estimated Cross-covariances");
 
 
@@ -161,6 +161,7 @@ for i = 1 : numY
         title(sprintf("Cross-cov %s x %s", ylist(i), ylist(j))); 
     end 
 end 
+
 visual.hlegend("Bottom", "VAR: Bootstrap", "VAR: Point Estimate", "Model: Asymptotic");
 visual.heading("Estimated Cross-covariances for Periodicities Below 40 Qtrs");
 

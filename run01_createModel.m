@@ -26,7 +26,11 @@ end
 % model, and can be manipulated by calling various IRIS functions.
 %
 
-m = Model.fromFile("spbc.model", "growth", true);
+m = Model.fromFile( ...
+    "model-source/spbc.model" ...
+    , "growth", true ...
+);
+
 disp(m)
 
 

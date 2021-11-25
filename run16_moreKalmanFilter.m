@@ -42,8 +42,11 @@ d = c;
 % distribution). This is allowed by the fact that the database `f1`
 % contains both the point estimates and the MSE matrices.
 
+checkSteady(mest);
+mest = solve(mest);
+
 [~, f0, v0, ~, pe0] = filter( ...
-    mest, d, startHist:endHist+10 ...
+    mest, d, startHist:endHist ...
     , "relative", false ...
 );
 
@@ -74,7 +77,7 @@ dbfun(@maxabs, pe0, pe1)
 
 disp("Smoothed estimates are identical for the last sub-sample")
 dbfun(@maxabs, f0.mean, f2.mean)
-dbfun(@maxabs, pe0, pe1)
+dbfun(@maxabs, pe0, pe2)
 
 
 %% Run Kalman Filter with Time Varying Std Devs of Some Shocks

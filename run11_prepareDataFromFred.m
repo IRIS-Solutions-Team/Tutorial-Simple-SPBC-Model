@@ -102,7 +102,7 @@ c = struct( );
 c.Short = dq.r3m;
 c.Long = dq.r5y;
 c.Growth = 100*((dq.y/dq.y{-1})^4 - 1);
-c.Infl = apct(dq.ny);
+c.Infl = apct(dq.ny/dq.y);
 c.Wage = 100*((dq.w/dq.w{-1})^4 - 1);
 
 ch = databank.Chartpack();

@@ -25,7 +25,10 @@ clear
 % dot-reference, i.e. the name of the model object dot the name of the
 % parameter.
 
-m = Model.fromFile("spbc.model", "growth", true);
+m = Model.fromFile( ...
+    "model-source/spbc.model" ...
+    , "growth", true ...
+);
 
 m.alpha = 1.03^(1/4);
 m.beta = 0.985^(1/4);
@@ -90,7 +93,10 @@ P.std_Mp = 0;
 P.std_Mw = 0;
 P.std_Ea = 0.1/100;
 
-m = Model.fromFile("spbc.model", "assign", P); 
+m = Model.fromFile( ...
+    "model-source/spbc.model" ...
+    , "growth", true ...
+);
 
 table(m, "parameters")
 
@@ -127,7 +133,11 @@ P.std_Mp = 0;
 P.std_Mw = 0;
 P.std_Ea = 0.1/100;
 
-m = Model.fromFile("spbc.model", "growth", true);
+m = Model.fromFile( ...
+    "model-source/spbc.model" ...
+    , "growth", true ...
+);
+
 
 m = assign(m, P); 
 

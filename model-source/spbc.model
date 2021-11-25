@@ -19,7 +19,6 @@
 % resulting model object as well.
 %
 
-
 !transition-variables
 
     "Output" Y, "Labor" N, "Wage rate" W
@@ -88,7 +87,7 @@
 % keyword `!all-but` reverses the logic of this section -- all variables
 % will be log-linearized except those listed here.
 
-!log-variables !all-but
+!log_variables !all_but
 
     Short, Long, Infl, Growth, Wage
     term20

@@ -50,26 +50,28 @@ load mat/createModel.mat m
 % that $T$ is upper quasi-triangular -- see next section.
 %
 
-[T, R, K, Z, H, D, U, Omg] = sspace(m); %#ok<ASGLU>
+s = solutionMatrices(m); %#ok<ASGLU>
+disp(s)
 
 disp('State-space matrices');
 
 disp('Size of T');
-sizeOfT = size(T) %#ok<NOPTS>
+sizeOfT = size(s.T) %#ok<NOPTS>
 
 disp('Size of R');
-sizeOfR = size(R) %#ok<NOPTS>
+sizeOfR = size(s.R) %#ok<NOPTS>
 
-disp('Size of K');
-size(K)
+disp('Size of k');
+size(s.k)
 
 disp('Size of Z');
-size(Z)
+size(s.Z)
 
 disp('Covariance matrix of residuals');
-Omg %#ok<NOPTS>
+s.Omega %#ok<NOPTS>
 
-%% Transition Matrix
+
+%% Transition Matrix 
 %
 % The transition matrix `T` can be divided into the upper part `Tf` (which
 % determines the non-predetermined variables) and the square lower part
@@ -82,8 +84,8 @@ Omg %#ok<NOPTS>
 % of predetermined (backward-looking) variables (which equals the size of
 % the vector $\alpha$) can be derived from the size of the matrix `T`.
 
-nx = size(T, 1);
-nb = size(T, 2);
+nx = size(s.T, 1);
+nb = size(s.T, 2);
 nf = nx - nb;
 
 disp("Size of transition matrix T")
@@ -98,8 +100,8 @@ nf %#ok<NOPTS>
 disp("Length of vector xb (and alpha)")
 nb %#ok<NOPTS>
 
-Tf = T(1:nf, :);
-Ta = T(nf+1:end, :);
+Tf = s.T(1:nf, :);
+Ta = s.T(nf+1:end, :);
 
 figure();
 spy(Ta);
@@ -151,11 +153,11 @@ m = expand(m, 2);
 disp("Solution is now expanded t+k periods forward")
 k = access(m, "forward-horizon") %#ok<NOPTS>
 
-[T, R, K, Z, H, D, U, Omg] = sspace(m);
+s1 = solutionMatrices(m);
 
 disp("Size of the matrix R before expansion")
 sizeOfR %#ok<NOPTS>
 
 disp("Size of the matrix R after expansion")
-size(R)
+size(s1.R)
 
