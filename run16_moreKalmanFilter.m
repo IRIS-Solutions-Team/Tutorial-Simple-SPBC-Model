@@ -115,7 +115,7 @@ j.std_Ep(endHist-9:endHist-5) = linspace(0.00, 0.4, 5);
 range = startHist:endHist+10;
 nPer = length(range)
 
-mll = loglik(mest, d, range, "relative", false, "objFuncContributions", true); 
+mll = loglik(mest, d, range, "relative", false, "returnObjFuncContribs", true); 
 
 size(mll) 
 

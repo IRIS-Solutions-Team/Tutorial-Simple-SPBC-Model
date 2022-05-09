@@ -176,7 +176,8 @@ bar(startHist:endHist, c.Infl{:, 1:end-2}, "stacked");
 grid on
 title("Contributions of shocks");
 
-legend(access(mest, "all-shocks-descriptions"), "location", "northWest");
+descriptions = access(mest, "all-shocks-descriptions");
+legend(descriptions, "location", "northWest");
 
 
 %% Plot Grouped Contributions

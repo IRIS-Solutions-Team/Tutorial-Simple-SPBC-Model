@@ -188,7 +188,7 @@ end
 
 N = 3000
 
-[theta, logpost, ar, posFinal, scale, finalCov] = arwm( ...
+[theta, logPost, ar, posFinal, scale, finalCov] = arwm( ...
     pos, N ...
     , "Progress", true ...c
     , "AdaptScale", 1/2 ...
@@ -204,7 +204,7 @@ figure( );
 %tiledlayout("flow");
 %nexttile( );
 subplot(2,2,1);
-    plot(logpost);
+    plot(logPost);
     title("Log Posterior");
 %nexttile( );
 subplot(2,2,2);
@@ -225,7 +225,7 @@ subplot(2,2,3);
 % characteristics; see help on `poster/stats` for details.
 %
 
-s = stats(pos, theta, logpost)
+s = stats(pos, theta, logPost)
 
 
 %% Visualize Priors and Posteriors
@@ -258,5 +258,5 @@ end
 
 %% Save Model Object with Estimated Parameters
 
-save mat/estimateParams.mat mest pos estimSpecs theta logpost s startHist endHist
+save mat/estimateParams.mat mest pos estimSpecs theta logPost s startHist endHist
 

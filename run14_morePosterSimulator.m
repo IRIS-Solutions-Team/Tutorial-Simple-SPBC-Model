@@ -36,7 +36,7 @@ rng(0);
 disp("Run the posterior simulator at once")
 
 tic( )
-[theta1, logpost1, ar1, pos1] = arwm(pos, N, "Progress", true); %#ok<ASGLU>
+[theta1, logPost1, ar1, pos1] = arwm(pos, N, "Progress", true); %#ok<ASGLU>
 toc( )
 
 
@@ -68,7 +68,7 @@ toc( )
 % in 
 %
 % * either the simulated posterior chain, `theta1`, and posterior log
-% densities, `logpost1`;
+% densities, `logPost1`;
 % * or the file name under which the batches where saved when running
 % `arwm( )` with the option `SaveEvery=`, i.e. `"myposter"` in this
 % example.
@@ -82,11 +82,11 @@ toc( )
 %
 
 tic( )
-stats1 = stats(pos, theta1, logpost1, "mode", true, "cov", true);
+stats1 = stats(pos, theta1, logPost1, "mode", true, "cov", true);
 toc( )
 
 tic( )
-stats2 = stats(pos, "myposter.h5", "mode", true, "cov", true);
+stats2 = stats(pos, "myposter.h5", [], "mode", true, "cov", true);
 toc( )
 
 disp(" ")
@@ -131,7 +131,7 @@ maxabs(stats1.cov, stats2.cov)
 %
 
 rng(1);
-[theta1, logpost1, ar1] = arwm(pos, 300, ...
+[theta1, logPost1, ar1] = arwm(pos, 300, ...
     "Progress", true, ...
     "Burnin", 50); 
 
@@ -141,15 +141,15 @@ rng(1);
 %
 
 rng(1);
-[theta21, logpost21, ar21, pos21] = arwm(pos, 100, ... 
+[theta21, logPost21, ar21, pos21] = arwm(pos, 100, ... 
     "Progress", true, ...
     "Burnin", 50);
 
-[theta22, logpost22, ar22, pos22] = arwm(pos21, 100, ... 
+[theta22, logPost22, ar22, pos22] = arwm(pos21, 100, ... 
     "Progress", true, ...
     "Burnin", 0); 
 
-[theta23, logpost23, ar23, pos23] = arwm(pos22, 100, ...
+[theta23, logPost23, ar23, pos23] = arwm(pos22, 100, ...
     "Progress", true, ...
     "Burnin", 0); 
 
@@ -159,7 +159,7 @@ rng(1);
 %
 
 theta2 = [theta21, theta22, theta23];
-logpost2 = [logpost21, logpost22, logpost23];
+logPost2 = [logPost21, logPost22, logPost23];
 ar2 = [ar21, ar22, ar23];
 
 %%%
@@ -172,7 +172,7 @@ disp("Max discrepancy in simulated chain")
 maxabs(theta1, theta2)
 
 disp("Max discrepancy in log posterior density")
-maxabs(logpost1, logpost2)
+maxabs(logPost1, logPost2)
 
 disp("Max discrepancy in cumulative acceptance ratios")
 maxabs(ar1, ar2)
