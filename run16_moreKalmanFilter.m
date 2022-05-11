@@ -79,6 +79,7 @@ disp("Smoothed estimates are identical for the last sub-sample")
 dbfun(@maxabs, f0.mean, f2.mean)
 dbfun(@maxabs, pe0, pe2)
 
+return
 
 %% Run Kalman Filter with Time Varying Std Devs of Some Shocks
 %

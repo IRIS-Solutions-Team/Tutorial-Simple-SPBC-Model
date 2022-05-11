@@ -37,7 +37,7 @@ databank.list(d)
 % `ReturnMse=` to control what is reported in the output data struct.
 
 [~, f, v, ~, pe, co] = filter(mest, d, startHist:endHist+1);
-
+[f1,m1,info] = kalmanFilter(mest, d, startHist:endHist+1);
 
 %)
 
@@ -92,6 +92,11 @@ k = 8;
 
 [~, g] = filter(mest, d, startHist:endHist, ...
     "output", ["pred", "smooth"], "meanOnly", true, "ahead", k);
+
+%%
+g1 = kalmanFilter(mest, d, startHist:endHist, ...
+    "outputData", ["pred", "smooth"], "meanOnly", false, "ahead", k);
+return
 
 g %#ok<NOPTS>
 g.pred

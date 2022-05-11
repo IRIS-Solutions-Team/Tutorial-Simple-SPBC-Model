@@ -97,13 +97,12 @@ maxabs(C1(index), C2(index))
 
 d1 = zerodb(m1, 1:20);
 d1.Er(1) = 0.01;
-s1 = simulate(m1, d1, 1:20, "deviation", true);
-s1 = dbextend(d1, s1);
+s1 = simulate(m1, d1, 1:20, "deviation", true, "prependInput", true);
 
 d2 = zerodb(m2, 1:20);
 d2.Er(1) = 0.01;
 s2 = simulate(m2, d2, 1:20, "deviation", true);
-s2 = dbextend(d2, s2);
+
 
 [s1.Y, s2.Y, s1.Y-s2.Y] %#ok<NOPTS>
 maxabs(s1, s2)

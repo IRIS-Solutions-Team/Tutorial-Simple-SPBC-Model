@@ -185,11 +185,21 @@ unstableRootsTable = table(m, "UnstableRoots")
 
 format
 
-%% Plot stable roots against unit circle 
+%% Plot stable roots 
 
 figure( )
-ploteig(stableRootsTable{:, 1});
-title("Stable Roots");
+visual.eigen(stableRootsTable{:, 1});
+title("Stable roots");
+
+
+%% Plot inverted unstable roots 
+
+figure( )
+visual.eigen(1./unstableRootsTable{:, 1});
+title("Inverted unstable roots");
+
+
+%% Sorted roots
 
 [~, pos] = sort(stableRootsTable{:, 2}, "descend");
 stableRootsSortedTable = stableRootsTable(pos, :);

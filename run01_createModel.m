@@ -89,10 +89,18 @@ access(m, "std-values")
 
 m = steady(m);
 checkSteady(m);
+
+m1 = m;
+m1.A = 2;
+m1.P = 1;
+m1.alpha = 1.02^(1/4);
+m1 = steady(m1, "fixLevel", ["A", "P"]);
+checkSteady(m1);
+
 access(m, 'steady')
 
 table( ...
-    m, ["steadyLevel", "steadyChange", "form", "description"] ...
+    [m, m1], ["steadyLevel", "steadyChange", "form", "description"] ...
     , "writeTable", "steady.xlsx" ...
 )
 
@@ -109,6 +117,13 @@ table( ...
 
 m = solve(m);
 disp(m)
+
+
+%% Extract first-order solution matrices
+
+st = solutionMatrices(m);
+sr = solutionMatrices(m, triangular=false);
+
 
 
 %% Save the model object

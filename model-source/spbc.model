@@ -90,6 +90,7 @@
 !log_variables !all_but
 
     Short, Long, Infl, Growth, Wage
+
     term20
 
 %
