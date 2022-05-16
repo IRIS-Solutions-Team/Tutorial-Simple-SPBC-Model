@@ -10,19 +10,21 @@ load mat/createModel.mat m
 
 %% Read data from St Louis Fed Fred databank through API
 
-if false
-    d = databank.fromFred([
-        "GDPC1->y"; "GDPCTPI->ny"; "AHETPI->w"; "TB3MS->r3m"
-        "GS5->r5y"; "CPILEGNS->cpi_u"; "CPILEGSL->cpi"
+if true
+    tic
+    d = databank.fromFred.data([
+        "GDPC1->y"; "GDPCTPI->py"; "AHETPI->w"; "TB3MS->r3m"
+        "GS5->r5y"; "CPILEGNS->cpi_u"; "CPILEGSL->cpi"; "PCEPI->pc"
     ]); 
+    toc
 
     databank.list(d)
 
     dq = struct( );
     dq.y = d.y;
-    dq.ny = d.ny;
+    dq.py = d.py;
 
-    databank.toCSV(dq, "Quarterly.csv", Inf);
+    databank.toCSV(dq, "fred-quarterly.csv", Inf);
 
     dm = struct( );
     dm.w = d.w;
@@ -30,8 +32,9 @@ if false
     dm.r3m = d.r3m;
     dm.cpi_u = d.cpi_u;
     dm.cpi = d.cpi;
+    dm.pc = d.pc;
 
-    databank.toCSV(dm, "Monthly.csv", Inf);
+    databank.toCSV(dm, "fred-monthly.csv", Inf);
 end
 
 %% Preprocess the data
@@ -47,9 +50,10 @@ plot( apct([dm.cpi_u, dm.cpi_s, dm.cpi]) ); % Period-on-period pct changes annua
 dq.r3m = convert(dm.r3m, Frequency.QUARTERLY, "method", @mean);
 
 func = @(x) convert(x, Frequency.QUARTERLY, "method", @mean);
-dq = databank.apply(func, dm, "addToDatabank", dq);
+dq = databank.apply(func, dm, "targetDb", dq);
 
 databank.list(dq)
+
 
 ch = databank.Chartpack();
 ch.Range = qq(1990,1):qq(2019,4);
@@ -102,11 +106,11 @@ c = struct( );
 c.Short = dq.r3m;
 c.Long = dq.r5y;
 c.Growth = 100*((dq.y/dq.y{-1})^4 - 1);
-c.Infl = apct(dq.ny/dq.y);
+c.Infl = apct(dq.cpi);
 c.Wage = 100*((dq.w/dq.w{-1})^4 - 1);
 
 ch = databank.Chartpack();
-ch.Range = qq(1970,1):qq(2019,4);
+ch.Range = qq(1995,1) : getEnd(c.Short);
 ch < access(m, "measurement-variables"); 
 
 draw(ch, c);

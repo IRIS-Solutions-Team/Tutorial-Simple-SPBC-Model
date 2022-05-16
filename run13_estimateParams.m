@@ -14,6 +14,10 @@ clear
 %#ok<*ASGLU> 
 %#ok<*CLARRSTR> 
 
+visualize = false;
+N = 3000;
+N = 100;
+
 
 %% Load Solved Model Object and Historical Database
 %
@@ -26,8 +30,18 @@ load mat/prepareDataFromFred.mat c
 
 d = c;
 startHist = qq(1990,1);
-endHist = qq(2019,3);
+% endHist = qq(2019,3);
+endHist = qq(2022,1);
 
+%{
+m.pi = (1 + 2/100)^(1/4);
+m.Short = 3;
+m.Wage_ = -2;
+
+m = steady(m, "exogenize", "Short", "endogenize", "beta0");
+checkSteady(m);
+m = solve(m);
+%}
 
 
 %% Set Up Estimation Input Structure
@@ -55,17 +69,18 @@ endHist = qq(2019,3);
 estimSpecs = struct( );
 
 % estimSpecs.chi = {NaN, 0.5, 0.95, distribution.Normal.fromMeanStd(0.85, 0.025)};
-estimSpecs.chi = {NaN, 0.5, 0.95, distribution.Normal.fromMeanStd(0.85, 0.015)};
-estimSpecs.xiw = {NaN, 30, 1000, distribution.Normal.fromMeanStd(60, 50)};
-estimSpecs.xip = {NaN, 30, 1000, distribution.Normal.fromMeanStd(300, 50)};
+estimSpecs.chi = {NaN, 0.5, 0.95, distribution.Normal.fromMeanStd(0.85, 0.01)};
+estimSpecs.xiw = {NaN, 30, 1000, distribution.Normal.fromMeanStd(60, 5)};
+estimSpecs.xip = {NaN, 30, 1000, distribution.Normal.fromMeanStd(300, 5)};
 estimSpecs.rhor = {NaN, 0.10, 0.95, distribution.Beta.fromMeanStd(0.85, 0.05)};
 estimSpecs.kappap = {NaN, 1.5, 10, distribution.Normal.fromMeanStd(3.5, 1)};
-estimSpecs.kappan = {NaN, 0, 1, distribution.Normal.fromMeanStd(0, 0.2)};
+estimSpecs.kappan = {NaN, 0, 0.2, distribution.Normal.fromMeanStd(0.1, 0.01)};
+estimSpecs.beta1 = {NaN, 0.8, 1};
 
 estimSpecs.std_Ep      = {0.01, 0.001, 0.10, distribution.InvGamma.fromMeanStd(0.01, Inf)};
 estimSpecs.std_Ew      = {0.01, 0.001, 0.10, distribution.InvGamma.fromMeanStd(0.01, Inf)};
 estimSpecs.std_Ea      = {0.001, 0.0001, 0.01, distribution.InvGamma.fromMeanStd(0.001, Inf)};
-estimSpecs.std_Er      = {0.005, 0.001, 0.10, distribution.InvGamma.fromMeanStd(0.005, Inf)};
+estimSpecs.std_Er      = {0.005, 0.0001, 0.10, distribution.InvGamma.fromMeanStd(0.005, Inf)};
 estimSpecs.std_Eterm20 = {0.05, 0.001, 0.30, distribution.InvGamma.fromMeanStd(0.10, Inf)};
 
 estimSpecs.corr_Er__Ep = {0, -0.9, 0.9, distribution.Normal.fromMeanStd(0, 0.5)};
@@ -85,14 +100,16 @@ disp(estimSpecs)
 % `h`.
 
 
-[~, ~, h] = plotpp( ...
-    estimSpecs, [ ], [ ] ...
-    , "subplot", [2, 3] ...
-);
+if visualize
+    [~, ~, h] = plotpp( ...
+        estimSpecs, [ ], [ ] ...
+        , "subplot", [2, 3] ...
+    );
 
-for f = h.figure
-    figure(f);
-    visual.heading("Prior Distribution");
+    for f = h.figure
+        figure(f);
+        visual.heading("Prior Distribution");
+    end
 end
 
 
@@ -119,9 +136,13 @@ end
 % * `delta` -- Estimates of the deterministic trend parameters estimated
 % by concentrating them out of the likelihood function.
 
+
 filterOpt = {
-    "outOfLik"; ["Short_", "Long_", "Infl_", "Growth_", "Wage_"]
-    "initUnit"; "approxDiffuse"
+    "outOfLik"; "Wage_"
+    "unitRootInitials"; "approxDiffuse"
+    "relative"; true
+    ... "simulate"; {"method", "stacked", "solver", {"quickNewton", "display", "iter"}}
+    ... "simulate"; {"method", "stacked"}
 };
 
 optimSet = { ...
@@ -143,9 +164,11 @@ summary
 
 
 n = neighbors(pos, 0.95:0.005:1.05);
-plotNeighbors(pos, n, "plotSystemPriors", false);
-visual.hlegend("bottom", "Minus log posterior", "Mode", "Contribution of data lik", "Contribution of indie priors")
 
+if visualize
+    plotNeighbors(pos, n, "plotSystemPriors", false);
+    visual.hlegend("bottom", "Minus log posterior", "Mode", "Contribution of data lik", "Contribution of indie priors")
+end
 
 
 %% Visualize Prior Distributions and Posterior Modes
@@ -155,22 +178,24 @@ visual.hlegend("bottom", "Minus log posterior", "Mode", "Contribution of data li
 % posterior modes are added as stem graphs, and the estimated values are
 % included in the graph titles.
 
-[pr, po, h] = plotpp(  ...
-    estimSpecs, summary, [ ], ...
-    "Title", {"FontSize", 8}, ...
-    "Axes", {"FontSize", 8}, ...
-    "PlotInit", {"LineWidth", 2}, ...
-    "PlotMode", {"LineWidth", 2}, ...
-    "Subplot", [2, 3] ...
-); 
-
-for f = h.figure
-    visual.heading("Prior Distributions and Posterior Modes");
-    visual.hlegend( ...
-        "Bottom" ...
-        , "Prior Density", "Starting Value", "Posterior Mode" ...
-        , "Lower Bound", "Upper Bound" ...
-    );
+if visualize
+    [pr, po, h] = plotpp(  ...
+        estimSpecs, summary, [ ], ...
+        "Title", {"FontSize", 8}, ...
+        "Axes", {"FontSize", 8}, ...
+        "PlotInit", {"LineWidth", 2}, ...
+        "PlotMode", {"LineWidth", 2}, ...
+        "Subplot", [2, 3] ...
+    ); 
+    
+    for f = h.figure
+        visual.heading("Prior Distributions and Posterior Modes");
+        visual.hlegend( ...
+            "Bottom" ...
+            , "Prior Density", "Starting Value", "Posterior Mode" ...
+            , "Lower Bound", "Upper Bound" ...
+        );
+    end
 end
 
 
@@ -186,7 +211,6 @@ end
 % distribution is gradually adapted to achieve this target.
 %
 
-N = 3000
 
 [theta, logPost, ar, posFinal, scale, finalCov] = arwm( ...
     pos, N ...
@@ -200,21 +224,18 @@ N = 3000
 
 %%
 
-figure( );
-%tiledlayout("flow");
-%nexttile( );
-subplot(2,2,1);
-    plot(logPost);
-    title("Log Posterior");
-%nexttile( );
-subplot(2,2,2);
-    plot(ar);
-    title("Cumulative Acceptance Rate");
-%nexttile( );
-subplot(2,2,3);
-    plot(scale);
-    title("Adaptive Scale of Proposal Cov");
-
+if visualize
+    tiledlayout("flow");
+    nexttile( );
+        plot(logPost);
+        title("Log Posterior");
+    nexttile( );
+        plot(ar);
+        title("Cumulative Acceptance Rate");
+    nexttile( );
+        plot(scale);
+        title("Adaptive Scale of Proposal Cov");
+end
 
 %% Calculate Posterior Distribution Statistics
 %
@@ -234,25 +255,27 @@ s = stats(pos, theta, logPost)
 % `N=1000`, the posterior graphs are far from being smooth, and may visibly
 % change if another posterior chain is generated.
 
-[pr, po, h] = plotpp( ...
-    estimSpecs, summary, theta, ...
-    "PlotPrior", {"LineStyle", "--"}, ...
-    "PlotMode", {"LineWidth", 3}, ...
-    "PlotInit", {"LineWidth", 3}, ...
-    "PlotBounds", {"LineStyle", "--"}, ...
-    "Title", {"FontSize", 8}, ...
-    "Subplot", [2, 3] ...
-); 
-
-for f = h.figure
-    figure(f);
-    visual.heading("Prior Distributions and Posterior Distributions");
-    visual.hlegend( ...
-        "Bottom",...
-        "Prior Density", "Starting Value", ...
-        "Posterior Mode", "Posterior Density", ...
-        "Lower Bound", "Upper Bound" ...
-    );
+if visualize
+    [pr, po, h] = plotspp( ...
+        estimSpecs, summary, theta, ...
+        "PlotPrior", {"LineStyle", "--"}, ...
+        "PlotMode", {"LineWidth", 3}, ...
+        "PlotInit", {"LineWidth", 3}, ...
+        "PlotBounds", {"LineStyle", "--"}, ...
+        "Title", {"FontSize", 8}, ...
+        "Subplot", [2, 3] ...
+    ); 
+    
+    for f = h.figure
+        figure(f);
+        visual.heading("Prior Distributions and Posterior Distributions");
+        visual.hlegend( ...
+            "Bottom",...
+            "Prior Density", "Starting Value", ...
+            "Posterior Mode", "Posterior Density", ...
+            "Lower Bound", "Upper Bound" ...
+        );
+    end
 end
 
 

@@ -24,7 +24,7 @@
     "Output" Y, "Labor" N, "Wage rate" W
     "Nominal marginal cost" Q, "Consumption habit" H, "Productivity" A
     "Rate of change in productivity" dA
-    "Final prices" P, "Interest rate" R
+    "Final prices" P, "Nominal interest rate" R, "Real interest rate" RR
     "5-year interest rate" R20, "5-Year expectations of short rates" R20exp
     "5-year term premium" term20
     "Price of capital" Pk
@@ -45,6 +45,7 @@
 !parameters
 
     "Long run growth !! \alpha" alpha, "Discount !! \beta" beta
+    "Utility of net worth parameter !! \beta_0" beta0, beta1
     "Labor share !! \gamma" gamma, "Depreciation !! \delta" delta,
     "Fixed level of capital" k
     "Inflation target" pi
@@ -87,7 +88,7 @@
 % keyword `!all-but` reverses the logic of this section -- all variables
 % will be log-linearized except those listed here.
 
-!log_variables !all_but
+!log-variables !all-but
 
     Short, Long, Infl, Growth, Wage
 
@@ -108,13 +109,15 @@
 
     P*Lambda = (1-chi)/(Y - chi*H) !! P*Y*Lambda = 1;
 
-    Lambda = beta*R*Lambda{1} !! beta*R = alpha*pi;
+    Lambda*(1 + beta0) = beta*R*Lambda{1} !! beta*R = alpha*pi*(1 + beta0);
 
     H = exp(Ey)*alpha*Y{-1} !! H = Y;
 
+    RR = R / dP{+1};
+
     "Wage Phillips curve"
     xiw/(eta-1)*(dW/dW{-1} - 1) = ...
-        beta*xiw/(eta-1)*(dW{1}/dW - 1 + Ew) ...
+        beta*beta1*xiw/(eta-1)*(dW{1}/dW - 1 + Ew) ...
         + (eta/(eta-1)*N^psi/(Lambda*W) - 1) ...
     !! eta/(eta-1)*N^psi = Lambda*W;
 
@@ -135,7 +138,7 @@
 
     "Price Phillips curve"
     xip/(eta-1)*(dP/dP{-1} - 1) = ...
-        beta*xip/(eta-1)*(dP{1}/dP - 1 + Ep) ...
+        beta*beta1*xip/(eta-1)*(dP{1}/dP - 1 + Ep) ...
         + (eta/(eta-1)*RMC - 1) ...
     !! eta/(eta-1)*Q = P;
 
@@ -153,7 +156,7 @@
     % Monetary policy
 
     log(R) = rhor*log(R{-1}) + (1-rhor)*(log(&R) ...
-        + kappap*(log(dP{+4}) - log(pi)) ...
+        + kappap*(log(d4P{+4})/4 - log(pi)) ...
         + kappan*(N/&N - 1)) + Er ...
     !! d4P = pi^4;
 

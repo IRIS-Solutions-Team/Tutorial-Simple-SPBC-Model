@@ -18,6 +18,7 @@ load mat/prepareDataFromFred.mat c
 
 startHist = qq(1990,1);
 endHist = qq(2019,3);
+endHist = qq(2022,1);
 d = databank.clip(c, -Inf, endHist);
 
 databank.list(c)
@@ -92,11 +93,6 @@ k = 8;
 
 [~, g] = filter(mest, d, startHist:endHist, ...
     "output", ["pred", "smooth"], "meanOnly", true, "ahead", k);
-
-%%
-g1 = kalmanFilter(mest, d, startHist:endHist, ...
-    "outputData", ["pred", "smooth"], "meanOnly", false, "ahead", k);
-return
 
 g %#ok<NOPTS>
 g.pred
@@ -181,7 +177,7 @@ bar(startHist:endHist, c.Infl{:, 1:end-2}, "stacked");
 grid on
 title("Contributions of shocks");
 
-descriptions = access(mest, "all-shocks-descriptions");
+descriptions = access(mest, "shocks-descriptions");
 legend(descriptions, "location", "northWest");
 
 

@@ -124,6 +124,7 @@ disp("Is the variable stationary?")
 access(m, "is-stationary")
 
 
+
 %% Get currently assigned steady state
 %
 % Steady state is described by complex numbers:
@@ -159,8 +160,11 @@ access(m, "maxLag")
 disp("Maximum lead in the model")
 access(m, "maxLead")
 
+disp("Transition vector")
+access(m, "transition-vector")'
+
 disp("List of initial conditions needed for simulations and forecasts")
-access(m, "initials")
+access(m, "initials")'
 
 
 %% Eigenvalues (Roots)
@@ -171,7 +175,7 @@ access(m, "initials")
 
 format short e
 
-disp("Model Eigenvalues (Roots)");
+disp("Model eigenvalues (Roots)");
 allRoots = table(m, "allRoots")
 
 % Stable roots
@@ -185,14 +189,13 @@ unstableRootsTable = table(m, "UnstableRoots")
 
 format
 
-%% Plot stable roots 
+
+%% Plot stable and inverted unstable roots 
 
 figure( )
+hold on
 visual.eigen(stableRootsTable{:, 1});
 title("Stable roots");
-
-
-%% Plot inverted unstable roots 
 
 figure( )
 visual.eigen(1./unstableRootsTable{:, 1});

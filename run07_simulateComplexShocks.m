@@ -22,7 +22,11 @@ clear
 %
 
 load mat/createModel.mat m
+load mat/estimateParams.mat mest
 
+m = mest;
+checkSteady(m);
+m = solve(m);
 
 %% Define Dates and Ranges
 
@@ -135,6 +139,7 @@ visual.heading("Consumption demand shock with delayed policy reaction");
 visual.hlegend("bottom", "No delay", "Anticipated", "Unanticipated");
 
 
+return
 %% Simulate consumption demand shock with fixed impact
 %
 % Find the size of a consumption demand shock such that it leads to exactly
@@ -171,16 +176,16 @@ visual.heading("Consumption demand shock with fixed impact");
 % Almost all IrisT model functions support multiple parametert variants.
 %
 
-m = alter(m, 8);
-m.xip = [140, 160, 180, 200, 220, 240, 260, 280];
-m = solve(m);
-disp(m);
+mm = alter(m, 8);
+mm.xip = [140, 160, 180, 200, 220, 240, 260, 280];
+mm = solve(mm);
+disp(mm);
 
-d = zerodb(m, startDate-3:startDate);
+d = zerodb(mm, startDate-3:startDate);
 d.Ey(1, :) = 0.07;
 
 s = simulate( ...
-    m, d, startDate:endDate, ...
+    mm, d, startDate:endDate, ...
     "deviation", true, ...
     "prependInput", true ...
 );
