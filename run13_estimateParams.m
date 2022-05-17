@@ -29,8 +29,7 @@ load mat/createModel.mat m
 load mat/prepareDataFromFred.mat c
 
 d = c;
-startHist = qq(1990,1);
-% endHist = qq(2019,3);
+startHist = qq(1995,1);
 endHist = qq(2022,1);
 
 %{
@@ -141,8 +140,6 @@ filterOpt = {
     "outOfLik"; "Wage_"
     "unitRootInitials"; "approxDiffuse"
     "relative"; true
-    ... "simulate"; {"method", "stacked", "solver", {"quickNewton", "display", "iter"}}
-    ... "simulate"; {"method", "stacked"}
 };
 
 optimSet = { ...
@@ -158,6 +155,8 @@ optimSet = { ...
 );
 
 summary
+
+f = kalmanFilter(mest, d, startHist:endHist, filterOpt{:});
 
 
 %% Visualize objective function (posterior mode) around optimum 
