@@ -45,24 +45,22 @@ d = c;
 checkSteady(mest);
 mest = solve(mest);
 
-[~, f0, v0, ~, pe0] = filter( ...
+f0 = kalmanFilter( ...
     mest, d, startHist:endHist ...
     , "relative", false ...
 );
 
 N = 15;
 
-[~, f1, v1, ~, pe1] = filter( ...
+f1 = kalmanFilter( ...
     mest, d, startHist:endHist-N ...
-    , "relative", false ...
 );
 
 f1 
 
-[~, f2, v2, ~, pe2] = filter( ...
+f2 = kalmanFilter( ...
     mest, d, endHist-N+1:endHist ...
-    , "relative", false ...
-    , "initCond", f1 ...
+    , "initials", {f1.Median, f1.MSE} ...
 ); 
 
 
@@ -72,16 +70,13 @@ f1
 %
 
 disp("Smoothed estimates differ for the first sub-sample")
-dbfun(@maxabs, f0.mean, f1.mean)
-dbfun(@maxabs, pe0, pe1)
+maxabs(f0.Mean, f1.Mean)
 
 disp("Smoothed estimates are identical for the last sub-sample")
-dbfun(@maxabs, f0.mean, f2.mean)
-dbfun(@maxabs, pe0, pe2)
+maxabs(f0.Mean, f2.Mean)
 
-return
 
-%% Run Kalman Filter with Time Varying Std Devs of Some Shocks
+%% Run Kalman filter with time varying std devs of some shocks
 %
 % Use the option `Vary=` to temporarily change some of the std deviations
 % (or also cross-correlations) within the filtered sample. The estimates of
@@ -90,15 +85,29 @@ return
 % and the Kalman filter with time-varying `std_Ep`.
 
 j = struct( );
-j.std_Ep = Series( );
-j.std_Ep(endHist-9:endHist-5) = linspace(0.00, 0.4, 5);
+j.std_Er = Series( );
+j.std_Er(endHist-9:endHist-5) = 0;
 
-[~, f1] = filter(mest, d, startHist:endHist, "override", j);
+f3 = kalmanFilter(mest, d, startHist:endHist, "override", j);
 
-[j.std_Ep, f1.mean.Ep, f0.mean.Ep] 
+j = struct( );
+j.std_Er = Series();
+j.std_Er(endHist-9:endHist-5) = mest.std_Er * 50;
+
+f4 = kalmanFilter(mest, d, startHist:endHist, "override", j);
+
+[j.std_Er, f0.Mean.Er, f3.Mean.Er, f4.Mean.Er] 
+
+ch = databank.Chartpack();
+ch.Range = endHist-20:endHist;
+ch.Highlight = endHist-9:endHist-5;
+ch < access(mest, "transition-shocks");
+draw(ch, databank.merge("horzcat", f0.Mean, f3.Mean, f4.Mean));
+visual.hlegend("bottom", "Baseline", "Zero", "50x");
+visual.heading("Time varying stds for productivity shocks");
 
 
-%% Evaluate Likelihood Function and Contributions of Individual Time Periods
+%% Evaluate likelihood function and contributions of individual time periods
 %
 % Run the function `loglik( )` to evaluate the likelihood function. This
 % function calls the very same Kalman filter as the function `filter( )`.
@@ -110,15 +119,16 @@ j.std_Ep(endHist-9:endHist-5) = linspace(0.00, 0.4, 5);
 % Set the option `ObjFuncContributions=true` to obtain not only the overall
 % likelihood, but also the contributions of individual time periods. They
 % are stowed in a column vector with the overall likelihood at the top; the
-% length of the vector is therefore $nPer+1$ where $nPer$ is the number of
+% length of the vector is therefore $numPer+1$ where $nPer$ is the number of
 % periods over which the filter is run.
 
 range = startHist:endHist+10;
-nPer = length(range)
+numPer = numel(range)
 
-mll = loglik(mest, d, range, "relative", false, "returnObjFuncContribs", true); 
+mll = loglik(mest, d, range, "relative", false);
+mllc = loglik(mest, d, range, "relative", false, "returnObjFuncContribs", true);
 
-size(mll) 
+size(mllc) 
 
 %%%
 %
@@ -126,7 +136,8 @@ size(mll)
 % the last 10 periods of the filter range, i.e. `endHist+1:endHist+10`, the
 % contributions of these last 10 periods are zero.
 
-mll 
+mllc
+
 
 %%%
 %
@@ -134,8 +145,8 @@ mll
 % likelihood. The following two numbers are the same (up to rounding
 % errors):
 
-mll(1)    
-sum(mll(2:end))
+mll
+sum(mllc)
 
 
 %%%
@@ -147,9 +158,9 @@ sum(mll(2:end))
 % periods are zeros because no observations were available in the input
 % database in those.
 
-x = Series(range, mll(2:end));
+x = Series(range, mllc);
 bar(x);
 grid on
-title("Contributions of Individual Time Periods to (Minus Log) Likelihood");
+title("Contributions of individual time periods to (minus log) likelihood");
 
 

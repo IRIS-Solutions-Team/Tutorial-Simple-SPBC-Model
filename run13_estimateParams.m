@@ -15,8 +15,8 @@ clear
 %#ok<*CLARRSTR> 
 
 visualize = false;
-N = 3000;
-N = 100;
+% numPoster = 3000;
+numPoster = 500;
 
 
 %% Load Solved Model Object and Historical Database
@@ -147,8 +147,6 @@ optimSet = { ...
     "MaxIter"; 100
 };
 
-% d = rmfield(d, "Long");
-
 [summary, pos, C, H, mest, v, delta, Pdelta] = estimate( ...
     m, d, startHist:endHist, estimSpecs ...
     , "filter", filterOpt ...
@@ -157,7 +155,6 @@ optimSet = { ...
 summary
 
 f = kalmanFilter(mest, d, startHist:endHist, filterOpt{:});
-
 
 %% Visualize objective function (posterior mode) around optimum 
 
@@ -201,7 +198,7 @@ end
 %% Run Adaptive Random Walk Metropolis Posterior Simulator
 %
 % Run 5,000 draws from the posterior distribution using an adaptive version
-% of the random-walk Metropolis algorithm. The number of draws, `N=1000`, 
+% of the random-walk Metropolis algorithm. The number of draws, `numPoster=1000`, 
 % should be obviously much larger in practice (such as 100,000 or
 % 1,000,000). 
 % The output argument `ar` monitors the evolution of the acceptance ratio.
@@ -210,9 +207,8 @@ end
 % distribution is gradually adapted to achieve this target.
 %
 
-
 [theta, logPost, ar, posFinal, scale, finalCov] = arwm( ...
-    pos, N ...
+    pos, numPoster ...
     , "Progress", true ...c
     , "AdaptScale", 1/2 ...
     , "AdaptProposalCov", 1/2 ...
@@ -251,7 +247,7 @@ s = stats(pos, theta, logPost)
 %% Visualize Priors and Posteriors
 %
 % Because the number of draws from the posterior distribution is very low, 
-% `N=1000`, the posterior graphs are far from being smooth, and may visibly
+% `numPoster=1000`, the posterior graphs are far from being smooth, and may visibly
 % change if another posterior chain is generated.
 
 if visualize

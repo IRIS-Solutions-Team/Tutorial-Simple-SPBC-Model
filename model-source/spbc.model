@@ -200,7 +200,6 @@
     "Intercept in output growth rate" Growth_
     "Intercept in wage inflation rate" Wage_
 
-
 %% Write deterministic trends on measurement variables
 
 !dtrends

@@ -17,7 +17,7 @@ load mat/estimateParams.mat mest
 load mat/prepareDataFromFred.mat c
 
 startHist = qq(1990,1);
-endHist = qq(2019,3);
+% endHist = qq(2019,3);
 endHist = qq(2022,1);
 d = databank.clip(c, -Inf, endHist);
 
@@ -37,10 +37,14 @@ databank.list(d)
 % Use the options `Output=`, `MeanOnly=`, `ReturnStd=` and
 % `ReturnMse=` to control what is reported in the output data struct.
 
-[~, f, v, ~, pe, co] = filter(mest, d, startHist:endHist+1);
-[f1,m1,info] = kalmanFilter(mest, d, startHist:endHist+1);
+f = kalmanFilter(mest, d, startHist:endHist);
 
-%)
+
+[f1, ~, info] = kalmanFilter( ...
+    mest, d, startHist:endHist ...
+    , "outputData", ["smooth", "predict", "update"] ...
+);
+
 
 
 %% Plot Estimated Shocks
@@ -50,17 +54,15 @@ databank.list(d)
 % the historical sample.
 %
 
-list = access(mest, "all-shocks");
-
 ch = databank.Chartpack();
 ch.Range = startHist:endHist;
 ch.Transform = @(x) 100*x;
 ch.AxesExtras = {@(h) yline(h, 0, "lineWidth", 2)};
 
-ch < access(mest, "all-shocks");
-draw(ch, f.mean);
+ch < access(mest, "transition-shocks");
+draw(ch, f.Mean);
 
-visual.heading("Estimated shocks");
+visual.heading("Estimates of transition shocks");
 
 
 ch = databank.Chartpack();
@@ -68,11 +70,12 @@ ch.Transform = @(x) 100*x;
 ch.PlotFunc = @histogram;
 ch.Range = cell.empty(1, 0);
 
-ch < access(mest, "all-shocks");
+ch < access(mest, "transition-shocks");
 
-draw(ch, f.mean);
+draw(ch, f.Mean);
 
-visual.heading("Histograms of Estimated Transition Shocks");
+visual.heading("Histograms of estimated transition shocks");
+
 
 
 %% K-Step-Ahead Kalman Predictions
@@ -89,44 +92,46 @@ visual.heading("Histograms of Estimated Transition Shocks");
 % Use the function `plotpred( )` to organize and plot the data in
 % a convenient way.
 
-k = 8;
-
-[~, g] = filter(mest, d, startHist:endHist, ...
-    "output", ["pred", "smooth"], "meanOnly", true, "ahead", k);
+g = kalmanFilter( ...
+    mest, d, startHist:endHist ...
+    , "outputData", ["predict", "smooth"] ...
+    , "meanOnly", true ...
+    , "ahead", 8 ...
+);
 
 g %#ok<NOPTS>
-g.pred
-g.smooth
+g.Predict
+g.Smooth
 
 figure( );
-[h1, h2] = plotpred(startHist:endHist, d.Short, g.pred.Short);
+[h1, h2] = plotpred(startHist:endHist, d.Short, g.Predict.Short);
 set(h1, "Marker", ".");
 set(h2, "LineStyle", ":", "LineWidth", 1.5);
 grid on
 title("Short Rates: 1- to 5-Qtr-Ahead Kalman Predictions");
 
 
-%% Resimulate Filtered Data
+%% Resimulate filtered data
 %
 % This is to illustrate that running a simulation with the initial
 % conditions and shocks estimated by the Kalman filter exactly reproduces
 % the historical paths of the observables.
 
-s = simulate(mest, f.mean, startHist:endHist, "anticipate", false);
+s = simulate(mest, f.Median, startHist:endHist, "anticipate", false);
 
-tempDb = databank.merge("horzcat", f.mean, s);
+tempDb = databank.merge("horzcat", f.Median, s);
 
 databank.apply(tempDb, @(x) max(abs(x(:,1)-x(:,2))))
 
 
-%% Run Counterfactual
+%% Run counterfactual
 %
 % Remove the cost-push shocks from the filtered database, and re-simulate
 % the historical data. This experiment shows what the data would have
 % looked like if inflation had been determeined exactly by the Phillips
 % curve without any cost-push shocks.
 
-f1 = f.mean;
+f1 = f.Median;
 f1.Ep(:) = 0;
 
 s1 = simulate(mest, f1, startHist:endHist, "anticipate", false);
@@ -138,7 +143,7 @@ title("Inflation, Q/Q PA");
 legend("Actual Data", "Counterfactual without Cost Push Shocks");
 
 
-%% Simulate Contributions of Shocks
+%% Simulate contributions of shocks
 %
 % Re-simulate the filtered data with the `Contributions=` option set to
 % true. This returns each variable as a multivariate time series with $n+1$
@@ -148,11 +153,16 @@ legend("Actual Data", "Counterfactual without Cost Push Shocks");
 % $n+1$-th column is the contribution of the initial condition and/or the
 % deterministic drift.
 
-c = simulate(mest, s, startHist:endHist+8, ...
-    "Anticipate", false, "Contributions", true, "PrependInput", true);
+c = simulate( ...
+    mest, s, startHist:endHist+8 ...
+    , "anticipate", false ...
+    , "contributions", true ...
+    , "prependInput", true ...
+);
 
 c %#ok<NOPTS>
 c.Infl
+
 
 %%%
 %
@@ -169,8 +179,7 @@ subplot(2, 1, 1);
 plot(startHist:endHist, [s.Infl, c.Infl{:, end-1}]);
 grid on
 title("Inflation, Q/Q PA");
-legend("Actual data", "Steady State + Init Cond", ...
-    "location", "northWest");
+legend("Actual data", "Steady State + Init Cond", "location", "northWest");
 
 subplot(2, 1, 2);
 bar(startHist:endHist, c.Infl{:, 1:end-2}, "stacked");
@@ -181,7 +190,7 @@ descriptions = access(mest, "shocks-descriptions");
 legend(descriptions, "location", "northWest");
 
 
-%% Plot Grouped Contributions
+%% Plot grouped contributions
 %
 % Use a `grouping` object to define groups of shocks whose contributions
 % will be added together and plotted as one category. Run `eval( )` to
@@ -189,7 +198,7 @@ legend(descriptions, "location", "northWest");
 % Otherwise, the information content of this figure window is the same as
 % the previous one.
 
-g = grouping(mest, "Shock", "IncludeExtras", true);
+g = grouping(mest, "shock", "includeExtras", true);
 g = addgroup(g, "Measurement", ["Mp", "Mw"]);
 g = addgroup(g, "Demand", ["Ey", "Er"]); %#ok<*CLARRSTR> 
 g = addgroup(g, "Supply", ["Ep", "Ea", "Ew"]);
@@ -204,16 +213,16 @@ subplot(2, 1, 1);
 plot(startHist:endHist, [s.Infl, c.Infl{:, end-1}]);
 grid on;
 title("Inflation, Q/Q PA");
-legend("Actual Data", "Steady state + Init Cond", ...
-    "Location", "NorthWest");
+legend("Actual Data", "Steady state + Init Cond", "location", "northWest");
 
 subplot(2, 1, 2);
 barcon(cg.Infl{:, 1:end-1});
 grid on;
 title("Contributions of Shocks");
-legend(lg(:, 1:end-1), "Location", "NorthWest");
+legend(lg(:, 1:end-1), "location", "northWest");
 
 
 %% Save Output Data for Further Use
 
 save mat/filterHistData.mat f
+
