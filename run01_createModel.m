@@ -126,7 +126,7 @@ disp(m)
 %% Extract first-order solution matrices
 
 st = solutionMatrices(m);
-sr = solutionMatrices(m, triangular=false);
+sr = solutionMatrices(m, "triangular", false);
 
 
 

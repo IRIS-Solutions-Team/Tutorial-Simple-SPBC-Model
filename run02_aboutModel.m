@@ -202,14 +202,6 @@ visual.eigen(1./unstableRootsTable{:, 1});
 title("Inverted unstable roots");
 
 
-%% Sorted roots
-
-[~, pos] = sort(stableRootsTable{:, 2}, "descend");
-stableRootsSortedTable = stableRootsTable(pos, :);
-
-[~, pos] = sort(unstableRootsTable{:, 2}, "ascend");
-unstableRootsSortedTable = unstableRootsTable(pos, :);
-
 
 %% Show most influential roots 
 %
@@ -217,9 +209,22 @@ unstableRootsSortedTable = unstableRootsTable(pos, :);
 % largest stable root and the smallest unstable root.
 %
 
-disp("Magnitude of the largest stable root")
-stableRootsSortedTable{1, 2}
+% Does not work in old Matlab release
 
-disp("Magnitude of smallest unstable root and its inverse")
-[unstableRootsSortedTable{1, 2}, 1./unstableRootsSortedTable{1, 2}]
+% Sorted roots
 
+try %#ok<TRYNC>
+    [~, pos] = sort(stableRootsTable{:, 2}, "descend");
+    stableRootsSortedTable = stableRootsTable(pos, :);
+
+    [~, pos] = sort(unstableRootsTable{:, 2}, "ascend");
+    unstableRootsSortedTable = unstableRootsTable(pos, :);
+
+    % Largest stable and smallest unstable
+
+    disp("Magnitude of the largest stable root")
+    stableRootsSortedTable{1, 2}
+
+    disp("Magnitude of smallest unstable root and its inverse")
+    [unstableRootsSortedTable{1, 2}, 1./unstableRootsSortedTable{1, 2}]
+end
