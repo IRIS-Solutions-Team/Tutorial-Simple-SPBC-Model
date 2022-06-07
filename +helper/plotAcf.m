@@ -8,7 +8,7 @@ xm = xm(:);
 xv = xv(:);
 xnv = xnv(:);
 
-histogram(xnv);
+histogram(xnv, "normalization", "pdf");
 hold on
 
 co = get(gca(), "colorOrder");

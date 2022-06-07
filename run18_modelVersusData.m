@@ -16,8 +16,10 @@ clear
 
 load mat/estimateParams.mat mest startHist endHist
 load mat/prepareDataFromFred.mat c 
+load mat/createModel.mat m
 
 d = c;
+endHist = qq(2018,4);
 
 
 %% Estimate VAR and BVAR
@@ -30,6 +32,7 @@ d = c;
 % dummy observations before running `estimate( )`.
 
 ylist = access(mest, "measurement-variables");
+ylist = setdiff(ylist, "Output");
 
 p = 2;
 
@@ -119,22 +122,22 @@ Nv = Nv(inx);
 % `helper.plotAcf( )` is a helper function (for plotting ACFs) created for
 % this exercise in this tutorial (it is not part of the IRIS toolbox).
 
-[Cv, Rv] = acf(v, "Order", 1);
-[CNv, RNv] = acf(Nv, "Order", 1);
-[Cm, Rm] = acf(mest, "Order", 1, "select", ylist);
+[Cv, Rv] = acf(v, "order", 1);
+[CNv, RNv] = acf(Nv, "order", 1);
+[Cm, Rm] = acf(mest, "order", 1, "select", ylist);
 
 numY = numel(ylist);
-figure( );
+figure();
 for i = 1 : numY
-    for j = i : numY
-        subplot(numY, numY, (i-1)*numY+j);
-        helper.plotAcf(CNv(i, j, 1, :), Cv(i, j, 1), Cm(i, j, 1)); %(#herePlotAcf)
-        title(sprintf("Cross-covariance %s x %s", ylist(i), ylist(j)));
+    for j = i+1 : numY
+        subplot(numY-1, numY-1, (i-1)*(numY-1)+j-1);
+        helper.plotAcf(RNv(i, j, 1, :), Rv(i, j, 1), Rm(i, j, 1)); %(#herePlotAcf)
+        title(sprintf("%s x %s", ylist(i), ylist(j)));
     end
 end
 
-visual.hlegend("Bottom", "Model: Asymptotic", "VAR: Bootstrap", "VAR: Point Estimate");;
-visual.heading("Estimated Cross-covariances");
+visual.hlegend("Bottom", "Model: Asymptotic", "VAR: Bootstrap", "VAR: Point estimate");
+visual.heading("Estimated cross-correlations");
 
 
 %% Compare Frequency Selective ACF
@@ -155,15 +158,15 @@ maxabs(Cv1+Cv2+Cv3 - Cv)
 
 figure( );
 for i = 1 : numY
-    for j = i : numY
-        subplot(numY, numY, (i-1)*numY+j);
-        helper.plotAcf(CNv1(i, j, 1, :), Cv(i, j, 1), Cm1(i, j, 1));
-        title(sprintf("Cross-cov %s x %s", ylist(i), ylist(j))); 
+    for j = i+1 : numY
+        subplot(numY-1, numY-1, (i-1)*(numY-1)+j-1);
+        helper.plotAcf(RNv1(i, j, 1, :), Rv(i, j, 1), Rm1(i, j, 1));
+        title(sprintf("%s x %s", ylist(i), ylist(j))); 
     end 
 end 
 
-visual.hlegend("Bottom", "VAR: Bootstrap", "VAR: Point Estimate", "Model: Asymptotic");
-visual.heading("Estimated Cross-covariances for Periodicities Below 40 Qtrs");
+visual.hlegend("Bottom", "VAR: Bootstrap", "VAR: Point estimate", "Model: Asymptotic");
+visual.heading("Estimated cross-correlations for periodicities below 40 Qtrs");
 
 
 %% Compare VAR and Model Spectra
@@ -177,17 +180,16 @@ visual.heading("Estimated Cross-covariances for Periodicities Below 40 Qtrs");
 
 freq = 0.05 : 0.05 : pi;
 [Pv, Sv] = xsf(v, freq);
-[Pm, Sm] = xsf(mest, freq, "select", ylist);
+[Pm, Sm] = xsf(m, freq, "select", ylist);
 
 figure( );
-
 for i = 1 : numel(ylist)
     subplot(2, 3, i);
     helper.plotXsf(freq, Sv(i, i, :), Sm(i, i, :));
     title(sprintf("Spect density %s", ylist(i)));
 end
 
-visual.hlegend("Bottom", "VAR: Point Estimate", "Model: Asymptotic");
-visual.heading("Estimated Spectral Densities");
+visual.hlegend("Bottom", "VAR: Point estimate", "Model: Asymptotic");
+visual.heading("Estimated spectral densities");
 
 
