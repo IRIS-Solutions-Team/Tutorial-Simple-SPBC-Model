@@ -60,8 +60,6 @@
     "Monetary policy reaction to labor !! \kappa_n" kappan
     "Autoregression in 5-year term premium !! \rho_{t20}" rhoterm20
 
-%
-
 
 %% Declare measurement variables (observables)
 
@@ -78,8 +76,6 @@
     "Measurement error on price inflation" Mp,
     "Measurement error on wage inflation" Mw
 
-%
-
 
 %% Control linearized and log-linerised variables
 %
@@ -94,8 +90,6 @@
     Short, Long, Infl, Growth, Wage
 
     term20
-
-%
 
 
 %% Write model equations
@@ -176,7 +170,6 @@
     !end
 
     d4P = P/P{-4};
-%
 
 
 %% Write measurement equations
@@ -190,8 +183,6 @@
     Growth = 100*((Y/Y{-1})^4 - 1);
     Output = Y;
 
-%
-
 
 %% Parameters for deterministic trends
 
@@ -203,9 +194,10 @@
     "Intercept in output growth rate" Growth_
     "Intercept in wage inflation rate" Wage_
 
-%% Write deterministic trends on measurement variables
 
-!dtrends
+%% Write measurement trends added to measurement variables
+
+!measurement-trends
 
     Short += Short_;
     Long += Long_;
@@ -213,5 +205,4 @@
     Growth += Growth_;
     Wage += Wage_;
 
-%
 
