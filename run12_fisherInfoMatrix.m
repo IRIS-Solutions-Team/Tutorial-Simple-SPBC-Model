@@ -41,6 +41,9 @@ load mat/createModel.mat m
 % The differences and other approximation errors are though usually
 % immaterial for detecting identification deficiencies.
 
+
+%% Time domain
+
 rng(0);
 
 % List of parameters for which for which the Fisher matrix will be
@@ -54,20 +57,31 @@ fprintf("Resample %g times from calibrated model.\n", numDraws);
 
 % Simulate a total of numDraws artificial data, length 40 periods.
 d = resample(m, [ ], 1:40, numDraws, "deviation", false);
-d = rmfield(d, ["Wage", "Long"]);
+d = rmfield(d, ["Wage", "Long", "Output"]);
 
 disp("Compute Hessians for each draw and average them")
 
-[mloglik, s, F1] = diffloglik(m, d, 1:40, plist, ...
-   "deviation", true, "relative", false, "progress", true);
+[mloglik, s, F1] = diffloglik( ...
+    m, d, 1:40, plist ...
+    , "deviation", true ...
+    , "relative", false ...
+    , "progress", true ...
+);
 
 F1 = mean(F1, 3);
 
-disp("Compute information matrix in frequency domain")
-[F2, F2i, d] = fisher(m, 40, plist, ...
-    "deviation", false, "exclude", ["Wage", "Long"], "progress", true);
 
-format shortEng;
+%% Frequency domain
+
+disp("Compute information matrix in frequency domain")
+[F2, F2i, d] = fisher( ...
+    m, 40, plist ...
+    , "deviation", false ...
+    , "exclude", ["Wage", "Long", "Output"] ...
+    , "progress", true ...
+);
+
+format shortEng
 disp("Compare time-domain and frequency domain info matrices")
 disp("Time domain")
 disp(F1)
@@ -90,6 +104,9 @@ format
 [u1, s1] = svd(F1);
 [u2, s2] = svd(F2);
 
+u1 = NamedMatrix(u1, plist, []);
+u2 = NamedMatrix(u2, plist, []);
+
 s1 = diag(s1);
 s2 = diag(s2);
 s1 = s1 / s1(1);
@@ -106,9 +123,8 @@ disp("Combinations of parameters ordered by degree of identification")
 disp("Best identified columns ordered first")
 
 disp("Time domain")
-[char(plist'), num2str(u1, "| %-.2g")] %#ok<NOPTS>
+disp(u1)
 disp("Frequency domain")
-[char(plist'), num2str(u2, "| %-.2g")] %#ok<NOPTS>
-
+disp(u2)
 format
 
