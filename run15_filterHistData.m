@@ -57,7 +57,7 @@ f = kalmanFilter(mest, d, startHist:endHist);
 ch = databank.Chartpack();
 ch.Range = startHist:endHist;
 ch.Transform = @(x) 100*x;
-ch.AxesExtras = {@(h) yline(h, 0, "lineWidth", 2)};
+ch.AxesExtras = {@(h) visual.vline(h)};
 
 ch < access(mest, "transition-shocks");
 draw(ch, f.Mean);
