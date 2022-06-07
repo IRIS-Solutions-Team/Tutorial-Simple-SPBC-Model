@@ -108,6 +108,7 @@ c.Long = dq.r5y;
 c.Growth = 100*((dq.y/dq.y{-1})^4 - 1);
 c.Infl = apct(dq.cpi);
 c.Wage = 100*((dq.w/dq.w{-1})^4 - 1);
+c.Output_ = dq.y;
 
 ch = databank.Chartpack();
 ch.Range = qq(1995,1) : getEnd(c.Short);

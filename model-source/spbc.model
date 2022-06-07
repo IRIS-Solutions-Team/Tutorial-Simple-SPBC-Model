@@ -27,7 +27,7 @@
     "Final prices" P, "Nominal interest rate" R, "Real interest rate" RR
     "5-year interest rate" R20, "5-Year expectations of short rates" R20exp
     "5-year term premium" term20
-    "Price of capital" Pk
+    "Price of capital" Pk, dPk
     "Rental price of capital" Rk
     "Households shadow value of wealth" Lambda
     "Inflation Q/Q" dP, "Inflation Y/Y" d4P, "Wage inflation Q/Q" dW
@@ -70,6 +70,7 @@
     "Short term rate" Short, "Long term rate" Long,
     "Price inflation" Infl,
     "Output growth" Growth, "Wage inflation" Wage
+    Output
 
 
 !measurement-shocks
@@ -142,7 +143,7 @@
         + (eta/(eta-1)*RMC - 1) ...
     !! eta/(eta-1)*Q = P;
 
-    RMC = Q/P !! RMC = (eta-1)/eta;
+    RMC = Q/P + 0*RMC{-1} !! RMC = (eta-1)/eta;
 
 
     % Productivity
@@ -170,10 +171,11 @@
 
     % One-quarter and four-quarter rates of change
 
-    dP = P/P{-1};
-    d4P = P/P{-4};
-    dW = W/W{-1};
+    !for P, W, Pk !do
+        d? = ?/?{-1};
+    !end
 
+    d4P = P/P{-4};
 %
 
 
@@ -186,6 +188,7 @@
     Infl = 100*((P/P{-1})^4 - 1 + Mp);
     Wage = 100*((W/W{-1})^4 - 1 + Mw);
     Growth = 100*((Y/Y{-1})^4 - 1);
+    Output = Y;
 
 %
 
