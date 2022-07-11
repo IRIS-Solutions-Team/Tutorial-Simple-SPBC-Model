@@ -11,22 +11,22 @@ load mat/createModel.mat m
 %% Read data from St Louis Fed Fred databank through API
 
 if true
-    tic
+    tic()
     d = databank.fromFred.data([
         "GDPC1->y"; "GDPCTPI->py"; "AHETPI->w"; "TB3MS->r3m"
         "GS5->r5y"; "CPILEGNS->cpi_u"; "CPILEGSL->cpi"; "PCEPI->pc"
     ]); 
-    toc
+    toc()
 
     databank.list(d)
 
-    dq = struct( );
+    dq = struct();
     dq.y = d.y;
     dq.py = d.py;
 
-    databank.toCSV(dq, "fred-quarterly.csv", Inf);
+    databank.toCSV(dq, "csv-data/fred-quarterly.csv", Inf);
 
-    dm = struct( );
+    dm = struct();
     dm.w = d.w;
     dm.r5y = d.r5y;
     dm.r3m = d.r3m;
@@ -34,17 +34,18 @@ if true
     dm.cpi = d.cpi;
     dm.pc = d.pc;
 
-    databank.toCSV(dm, "fred-monthly.csv", Inf);
+    databank.toCSV(dm, "csv-data/fred-monthly.csv", Inf);
 end
 
-%% Preprocess the data
 
-dq = databank.fromCSV("fred-quarterly.csv");
-dm = databank.fromCSV("fred-monthly.csv");
+%% Preprocess the FRED data
+
+dq = databank.fromCSV("csv-data/fred-quarterly.csv");
+dm = databank.fromCSV("csv-data/fred-monthly.csv");
 
 dm.cpi_s = x13.season(dm.cpi_u);
 
-figure( );
+figure();
 plot( apct([dm.cpi_u, dm.cpi_s, dm.cpi]) ); % Period-on-period pct changes annualized
 
 dq.r3m = convert(dm.r3m, Frequency.QUARTERLY, "method", @mean);
@@ -72,20 +73,20 @@ dq.log_y = log(dq.y);
 [dq.log_y_tnd, dq.log_y_gap] = hpf(dq.log_y, filterRange);
 
 % HP with trend matching data in 2008-Q3
-level = Series( );
+level = Series();
 level(qq(2008,3)) = dq.log_y(qq(2008,3));
 [dq.log_y_tnd1, dq.log_y_gap1] = hpf( ...
     dq.log_y, filterRange, "Level", level ...
 );
 
 % HP with growth 4% in 2022-Q4
-change = Series( );
+change = Series();
 change(qq(2022,4)) = 4/400;
 [dq.log_y_tnd2, dq.log_y_gap2] = hpf( ...
     dq.log_y, filterRange, "Change", change ...
 );
 
-figure( );
+figure();
 plotRange = qq(2008,1) : filterRange(end);
 h = plot( ...
     plotRange, ...
@@ -102,7 +103,7 @@ legend("HP", "HP with Trend=Data in 2008-Q3", "HP with trend growth 4% in 2022-Q
 
 %% Create model consistent databank with measurement variables
 
-c = struct( );
+c = struct();
 c.Short = dq.r3m;
 c.Long = dq.r5y;
 c.Growth = 100*((dq.y/dq.y{-1})^4 - 1);
@@ -112,8 +113,7 @@ c.Output_ = dq.y;
 
 ch = databank.Chartpack();
 ch.Range = qq(1995,1) : getEnd(c.Short);
-ch < access(m, "measurement-variables"); 
-
+ch < m{"measurement-variables"};
 draw(ch, c);
 
 
