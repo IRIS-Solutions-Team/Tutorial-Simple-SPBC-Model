@@ -137,7 +137,7 @@ end
 
 
 filterOpt = {
-    "outOfLik"; "Wage_"
+    "outLik"; "Wage_"
     "unitRootInitials"; "approxDiffuse"
     "relative"; true
 };
@@ -148,7 +148,7 @@ optimSet = { ...
 };
 
 [summary, pos, C, H, mest, v, delta, Pdelta] = estimate( ...
-    m, d, startHist:endHist, estimSpecs ...
+    m, d, startHist:endHist, estimSpecs, [] ...
     , "filter", filterOpt ...
 );
 
