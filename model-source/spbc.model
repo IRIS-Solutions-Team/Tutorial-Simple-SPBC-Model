@@ -7,7 +7,7 @@
 % Matlab functions and IrisT functions.
 %
 % Model source files themselves cannot be executed. Instead, they are read
-% in and converted into model objects by the IrisT function
+% in and converted into model objects by the Iris function
 % `Model.fromFile()`. This is shown in [`createModel`](createModel.m).
 %
 
@@ -61,21 +61,6 @@
     "Autoregression in 5-year term premium !! \rho_{t20}" rhoterm20
 
 
-%% Declare measurement variables (observables)
-
-!measurement-variables
-
-    "Short term rate" Short, "Long term rate" Long,
-    "Price inflation" Infl,
-    "Output growth" Growth, "Wage inflation" Wage
-    Output
-
-
-!measurement-shocks
-
-    "Measurement error on price inflation" Mp,
-    "Measurement error on wage inflation" Mw
-
 
 %% Control linearized and log-linerised variables
 %
@@ -85,9 +70,8 @@
 % keyword `!all-but` reverses the logic of this section -- all variables
 % will be log-linearized except those listed here.
 
-!log-variables !all-but
 
-    Short, Long, Infl, Growth, Wage
+!log-variables !all-but
 
     term20
 
@@ -100,14 +84,18 @@
 
 !transition-equations
 
-    % Consumers
+    % Households
 
+    "Consumption demand"
     P*Lambda = (1-chi)/(Y - chi*H) !! P*Y*Lambda = 1;
 
+    "Intertemporal choice"
     Lambda*(1 + beta0) = beta*R*Lambda{1} !! beta*R = alpha*pi*(1 + beta0);
 
+    "Habit in consumption"
     H = exp(Ey)*alpha*Y{-1} !! H = Y;
 
+    "Real interest rate"
     RR = R / dP{+1};
 
     "Wage Phillips curve"
@@ -116,32 +104,34 @@
         + (eta/(eta-1)*N^psi/(Lambda*W) - 1) ...
     !! eta/(eta-1)*N^psi = Lambda*W;
 
-
-    % Price of Capital
-
+    "Market price of production capital"
     Lambda*Pk = beta*Lambda{1}*(Rk{1} + (1-delta)*Pk{1});
 
 
-    % Supply Side
+    % Supply side
 
     "Production function"
     Y = A * (N - (1-gamma)*&N)^gamma * k^(1-gamma);
 
+    "Demand for labor"
     gamma*Q*Y = W*(N - (1-gamma)*&N);
 
+    "Demand for capital"
     (1-gamma)*Q*Y = Rk*k;
 
-    "Price Phillips curve"
+    "Price setting (Phillips curve)"
     xip/(eta-1)*(dP/dP{-1} - 1) = ...
         beta*beta1*xip/(eta-1)*(dP{1}/dP - 1 + Ep) ...
         + (eta/(eta-1)*RMC - 1) ...
     !! eta/(eta-1)*Q = P;
 
-    RMC = Q/P + 0*RMC{-1} !! RMC = (eta-1)/eta;
+    "Real marginal cost"
+    RMC = Q/P !! RMC = (eta-1)/eta;
 
 
     % Productivity
 
+    "Productivity growth"
     log(dA) = rhoa*log(dA{-1}) + (1-rhoa)*log(alpha) + Ea ...
     !! dA = alpha;
 
@@ -150,6 +140,7 @@
 
     % Monetary policy
 
+    "Monetary policy reaction function"
     log(R) = rhor*log(R{-1}) + (1-rhor)*(log(&R) ...
         + kappap*(log(d4P{+4})/4 - log(pi)) ...
         + kappan*(N/&N - 1)) + Er ...
@@ -158,8 +149,13 @@
 
     % Long rates
 
-    log(R20exp) = movavg(log(R), +20);
+    "Long (5-year) rate"
     log(R20) = log(R20exp) + term20;
+
+    "Expected average of short term rates over 5 years"
+    log(R20exp) = movavg(log(R), +20);
+
+    "Term premium for 5-year rate"
     term20 = rhoterm20*term20{-1} + Eterm20;
 
 
@@ -172,11 +168,33 @@
     d4P = P/P{-4};
 
 
+    
+%% Declare measurement variables (observables)
+
+!measurement-variables
+
+    "Short term rate" Short, "Long term rate" Long,
+    "Price inflation" Infl,
+    "Output growth" Growth, "Wage inflation" Wage
+    "Level of output" Output
+
+
+!log-variables !all-but
+
+    Short, Long, Infl, Growth, Wage
+
+
+!measurement-shocks
+
+    "Measurement error on price inflation" Mp,
+    "Measurement error on wage inflation" Mw
+
+
 %% Write measurement equations
 
 !measurement-equations
 
-    Short =  100*(R^4 - 1);
+    Short = 100*(R^4 - 1);
     Long =  100*(R20^4 - 1);
     Infl = 100*((P/P{-1})^4 - 1 + Mp);
     Wage = 100*((W/W{-1})^4 - 1 + Mw);

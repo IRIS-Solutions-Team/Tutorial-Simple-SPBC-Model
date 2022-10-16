@@ -3,6 +3,7 @@
 % Simulate a simple shock both as deviations from control and in full
 % levels, and report the simulation results.
 
+
 %% Clear Workspace
 %
 % Clear workspace, close all graphics figures, clear command window, and
@@ -58,9 +59,9 @@ endDate = 40;
 % the input database accordingly so that it includes all necessary initial
 % conditions.
 
-d = zerodb(m, startDate:endDate);
+d = databank.forModel(m, startDate:endDate);
 d.Ey(startDate) = log(1.01);
-s = simulate(m, d, 1:40, 'deviation', true, 'prependInput', true)
+s = simulate(m, d, 1:40, 'deviation', true, 'prependInput', true);
 
 
 %% Report Simulation Results
@@ -75,12 +76,12 @@ ch.Range = startDate-1 : startDate+19;
 ch.Transform = @(x) 100*(x-1);
 ch.Round = 8;
 
-ch < "Inflation, Q/Q PA // Pp Deviations: dP^4 ";
-ch < "Policy rate, PA // Pp Deviations: R^4 ";
-ch < "Output // Pct Level Deviations: Y ";
-ch < "Hours Worked // Pct Level Deviations: N ";
-ch < "Real Wage // Pct Level Deviations: W/P ";
-ch < "Capital Price // Pct Level Deviations: Pk"; 
+ch + "Inflation, Q/Q PA // Pp Deviations: dP^4 ";
+ch + "Policy rate, PA // Pp Deviations: R^4 ";
+ch + "Output // Pct Level Deviations: Y ";
+ch + "Hours Worked // Pct Level Deviations: N ";
+ch + "Real Wage // Pct Level Deviations: W/P ";
+ch + "Capital Price // Pct Level Deviations: Pk"; 
 
 draw(ch, s);
 visual.heading("Consumption Demand Shock -- Deviations from Control");
