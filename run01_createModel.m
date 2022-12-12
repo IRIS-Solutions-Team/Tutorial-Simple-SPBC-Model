@@ -30,6 +30,7 @@ end
 m = Model.fromFile( ...
     "model-source/spbc.model" ...
     , "growth", true ...
+    , "savePreparsed", "model-source/spbc.preparsed.model" ...
 );
 
 disp(m)
@@ -82,23 +83,23 @@ access(m, "std-values")
 %% Find steady state
 %
 % Run `steady()` to calculate the steady-state values for all model
-% variables. The option `Growth=true` means this is a non-stationary BGP
-% model where variables can grow at a constant rate over time; the
-% steady-state solution algorithm is modified to handle models with growth.
-% Use `checkSteady()` to numerically verify the steady state values
-% on dynamic equations; if there is a significant numerical discrepancy,
-% the function will throw an error.
+% variables. The option `growth=true` used in the model constructor means
+% this is a non-stationary BGP model where variables can grow at a constant
+% rate over time; the steady-state solution algorithm is modified to handle
+% models with growth. Use `checkSteady()` to numerically verify the steady
+% state values on dynamic equations; if there is a significant numerical
+% discrepancy, the function will throw an error.
 %
 
 m.RR = 1.01^(1/4);
-m = steady(m, "exogenize", "RR", "endogenize", "beta0");
+m = steady(m, "exogenize", "RR", "endogenize", "beta0", "saveAs", "model-source/spbc.blazer.md");
 checkSteady(m);
 
 m1 = m;
 m1.A = 2;
 m1.P = 1;
-m1.alpha = 1.02^(1/4);
-m1 = steady(m1, "blocks", false, "fixLevel", ["A", "P"]);
+m1 = steady(m1, "fixLevel", ["A", "P"]);
+
 checkSteady(m1);
 
 access(m, 'steady')
@@ -107,7 +108,6 @@ table( ...
     [m, m1], ["steadyLevel", "steadyChange", "form", "description"] ...
     , "writeTable", "steady.xlsx" ...
 )
-
 
 %% Calculate first-order solution matrices
 %
